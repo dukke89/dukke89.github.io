@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO</title>
+
+  
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script defer src="theme.js"></script>
+
+<link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="demoras.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+</head>
+
+<body class="page-demoras">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div class="subtitle">Demoras</div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="themeToggle" class="icon-btn" title="Cambiar tema" aria-label="Cambiar tema"><i class="bi bi-moon-stars"></i></button>
+      <div class="update-box">
+        <div class="update-label">Última actualización</div>
+        <div id="lastUpdate" class="update-date">--/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab" href="analisis-mm.html">ANÁLISIS MM</a>
+    <a class="tab" href="index.html">CUMPLIMIENTO</a>
+    <a class="tab active" href="demoras.html">DEMORAS</a>
+  </nav>
+
+  <main class="container">
+    <div id="msg"></div>
+
+    <!-- FILTROS -->
+    <section class="panel">
+      <div class="panel-body filters filters-demoras">
+        <div class="filter">
+          <label>CLIENTE</label>
+          <select id="clienteSelect">
+            <option value="">Todos</option>
+          </select>
+          <div id="clienteHint" class="hint">Columna cliente: -</div>
+        </div>
+
+        <div class="filter">
+          <label>MES</label>
+          <select id="mesSelect"></select>
+          <div id="mesHint" class="hint">Mes seleccionado: -</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="panel">
+      <div class="panel-title">ITEMS CUMPLIDOS FT - DESGLOSE POR ÁREA</div>
+      <div class="panel-body kpi-grid kpi-grid-3">
+        <div class="kpi kpi-blue">
+          <div class="kpi-head">
+            <div class="kpi-title">DEMORAS (MES)</div>
+            <div class="kpi-icon">⏱</div>
+          </div>
+          <div id="kpiDemorasMes" class="kpi-value">-</div>
+          <div class="kpi-sub">Cantidad de pedidos con demora</div>
+        </div>
+
+        <div class="kpi kpi-amber">
+          <div class="kpi-head">
+            <div class="kpi-title">ÁREA TOP (MES)</div>
+            <div class="kpi-icon">🏷</div>
+          </div>
+          <div id="kpiTopArea" class="kpi-value kpi-value-sm">-</div>
+          <div id="kpiTopAreaSub" class="kpi-sub kpi-sub-strong">-</div>
+        </div>
+
+        <div class="kpi kpi-green">
+          <div class="kpi-head">
+            <div class="kpi-title">% TOP ÁREA</div>
+            <div class="kpi-icon">%</div>
+          </div>
+          <div id="kpiTopPct" class="kpi-value">-</div>
+          <div class="kpi-sub">Sobre demoras del mes</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="panel">
+      <div class="panel-title">GRÁFICOS</div>
+      <div class="panel-body grid-2">
+        <div class="chart-card">
+          <div class="chart-title">Cantidad de demoras por mes</div>
+          <div class="chart-wrap">
+            <canvas id="chartMes"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">% de demoras por ÁREA (mes seleccionado)</div>
+          <div class="chart-wrap">
+            <canvas id="chartAreas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLA -->
+    <section class="panel">
+      <div class="panel-title">TABLA: DEMORAS POR MES Y ÁREA</div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table class="table" id="tablaAreas">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footnote">
+      Fuente: <b>DEMORAS.csv</b> (delimitador “;”). Columnas de áreas: detectadas automáticamente.
+    </footer>
+  </main>
+
+  <script src="demoras.js"></script>
+</body>
+</html>
+
+
