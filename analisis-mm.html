@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO</title>
+
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="analisis-mm.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body class="page-mm">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div class="subtitle">Análisis MM</div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="update-box">
+        <div class="update-label">Última actualización</div>
+        <div id="lastUpdate" class="update-date">--/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab active" href="analisis-mm.html">ANÁLISIS MM</a>
+    <a class="tab" href="index.html">CUMPLIMIENTO</a>
+    <a class="tab" href="demoras.html">DEMORAS</a>
+  </nav>
+
+  <main class="container">
+    <div id="msg"></div>
+
+    <!-- FILTRO -->
+    <section class="panel">
+      <div class="panel-body mm-filter-row">
+        <div class="filter">
+          <label>CLIENTE (ALMACEN)</label>
+          <select id="clienteSelect">
+            <option value="">Todos</option>
+          </select>
+          <div id="clienteHint" class="hint">Columna cliente: -</div>
+        </div>
+
+        <div class="filter">
+          <label>&nbsp;</label>
+          <button id="btnReset" class="btn">Reset</button>
+          <div class="hint">Vuelve a “Todos”</div>
+        </div>
+
+        <div class="filter mm-source">
+          <div class="hint"><b>Fuente:</b> <span id="mmSourceName">ANALISIS-MM.csv</span> (delimitador “;”)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="panel">
+      <div class="panel-title">DISPONIBILIDAD</div>
+
+      <div class="panel-body kpi-grid kpi-grid-3">
+        <div class="kpi kpi-blue">
+          <div class="kpi-head">
+            <div class="kpi-title">CANT MATERIALES</div>
+            <div class="kpi-icon">📦</div>
+          </div>
+          <div id="kpiMat" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Materiales distintos</div>
+        </div>
+
+        <div class="kpi kpi-green">
+          <div class="kpi-head">
+            <div class="kpi-title">CANT DISPONIBLE</div>
+            <div class="kpi-icon">✅</div>
+          </div>
+          <div id="kpiDisp" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Materiales con Libre utilización &gt; 0</div>
+        </div>
+
+        <div class="kpi kpi-amber">
+          <div class="kpi-head">
+            <div class="kpi-title">DISPONIBLE</div>
+            <div class="kpi-icon">📈</div>
+          </div>
+          <div id="kpiPct" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Disponible / Materiales</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTADOS -->
+    <section class="panel">
+      <div class="panel-title">ESTADOS</div>
+
+      <div class="panel-body">
+        <div class="mm-card">
+  <div class="mm-card-title">GRÁFICO CIRCULAR</div>
+
+  <div class="donut-layout">
+    <div class="chart-box donut-canvas">
+      <div id="donutEstados" class="mm-d3chart" aria-label="Gráfico circular"></div>
+    </div>
+
+    <div class="mm-legend donut-legend" id="donutLegend"></div>
+  </div>
+</div>
+
+    </section>
+
+    <footer class="footnote">
+      Fuente: <b>ANALISIS-MM.csv</b> · Filtro: <b>ALMACEN</b> · Cálculo: materiales distintos (Material) y disponibles (Libre utilización &gt; 0).
+    </footer>
+  </main>
+
+  <script src="analisis-mm.js"></script>
+</body>
+</html>
+
