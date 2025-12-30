@@ -385,7 +385,7 @@
 /* ===== AJUSTE: achicar tabla Valorización + scroll interno (como imagen 2) ===== */
 /* Alto visible de la tabla (ajustá 300-360 según prefieras) */
 .page-mm .mm-table-wrap-scroll{
-  max-height: 320px !important;
+  max-height: 520px !important;
   overflow: auto !important;
 }
 
