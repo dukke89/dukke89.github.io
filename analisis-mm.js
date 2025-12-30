@@ -5,18 +5,30 @@
 const CSV_PATH = "ANALISIS-MM.csv";
 const DELIM = ";";
 
-// Posibles nombres de columnas (por si cambian los encabezados)
-const CLIENT_CANDIDATES = ["ALMACEN", "Cliente", "CLIENTE", "OBRA", "CENTRO"];
+// Columnas posibles (tolerantes a variantes)
+const CLIENT_CANDIDATES  = ["ALMACEN", "Cliente", "CLIENTE", "OBRA", "CENTRO"];
 const MATERIAL_CANDIDATES = ["Material", "MATERIAL", "Código Item", "CODIGO ITEM", "Codigo Item", "CODIGO"];
-const LIBRE_CANDIDATES = ["Libre utilizacion", "Libre utilización", "LIBRE UTILIZACION", "LIBRE UTILIZACIÓN", "LIBRE", "Libre"];
-const ESTADO_CANDIDATES = ["Estado", "ESTADO", "estado"];
+const LIBRE_CANDIDATES   = ["Libre utilizacion", "Libre utilización", "LIBRE UTILIZACION", "LIBRE UTILIZACIÓN", "LIBRE", "Libre"];
+const ESTADO_CANDIDATES  = ["Estado", "ESTADO", "estado"];
+
+// 👇 Para valorización real (tu segunda imagen)
+const RUBRO_CANDIDATES   = ["RUBRO", "Rubro", "rubro", "CLASIFICACION", "CLASIFICACIÓN"];
+const VALOR_CANDIDATES   = [
+  "Valor libre utilización", "Valor libre utilizacion",
+  "VALOR LIBRE UTILIZACION", "VALOR LIBRE UTILIZACIÓN",
+  "VALOR", "Valor"
+];
 
 let headers = [];
-let dataRows = []; // objetos: {col -> valor}
+let dataRows = [];
+
 let COL_CLIENT = null;
 let COL_MATERIAL = null;
 let COL_LIBRE = null;
 let COL_ESTADO = null;
+
+let COL_RUBRO = null;
+let COL_VALOR = null;
 
 let chartDonut = null;
 
@@ -77,17 +89,35 @@ function byFirstExisting(cands) {
 }
 
 function parseDelimited(text, delim) {
-  // parser simple (sin comillas complejas) para CSVs de SAP/Excel
   const lines = text.split(/\r?\n/).filter(x => x.trim() !== "");
   return lines.map(line => line.split(delim));
 }
 
+// ✅ num parser robusto: soporta "$ 1.234.567,89", espacios, etc.
 function toNum(val) {
-  const s = String(val ?? "").trim();
+  let s = String(val ?? "").trim();
   if (!s) return NaN;
-  // admite 1.234,56 o 1234,56
-  const norm = s.replace(/\./g, "").replace(",", ".");
-  const n = Number(norm);
+
+  // deja solo dígitos, separadores y signo
+  s = s.replace(/[^0-9,.\-]/g, "");
+
+  // Caso AR: 1.234.567,89  -> 1234567.89
+  // Caso simple: 1234,56 -> 1234.56
+  // Caso US: 1234.56 -> 1234.56 (no tocamos)
+  const hasComma = s.includes(",");
+  const hasDot = s.includes(".");
+
+  if (hasComma && hasDot) {
+    // asumimos puntos miles y coma decimal
+    s = s.replace(/\./g, "").replace(",", ".");
+  } else if (hasComma && !hasDot) {
+    // coma decimal
+    s = s.replace(",", ".");
+  } else {
+    // dot decimal o entero: dejamos
+  }
+
+  const n = Number(s);
   return isFinite(n) ? n : NaN;
 }
 
@@ -148,8 +178,7 @@ function calcEstados(rows) {
     qty: setMat.size
   }));
 
-  // Ordena la leyenda/serie por prefijo numérico (01, 02, 03, 04, ...).
-  // Si no hay prefijo, va al final y se ordena alfabéticamente.
+  // ✅ Orden por prefijo numérico 01..04
   const prefNum = (s) => {
     const m = String(s || "").trim().match(/^\s*(\d{1,3})\b/);
     return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
@@ -162,7 +191,6 @@ function calcEstados(rows) {
   });
 
   const total = items.reduce((s, x) => s + x.qty, 0);
-
   return { items, total };
 }
 
@@ -171,10 +199,7 @@ function calcEstados(rows) {
 =========================== */
 
 function buildDonut(items, total) {
-  if (!window.echarts) {
-    console.warn('ECharts no cargó: revisá el <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js">');
-    return;
-  }
+  if (!window.echarts) return;
 
   const host = document.getElementById("donutEstados");
   const legend = document.getElementById("donutLegend");
@@ -188,13 +213,9 @@ function buildDonut(items, total) {
     return;
   }
 
-  // colores (stock nulo rojo fijo si existe)
   const palette = ["#2563eb", "#16a34a", "#f59e0b", "#8b5cf6", "#0ea5e9", "#22c55e", "#f97316", "#64748b"];
-  const isStockNulo = (name) => {
-    const n = normLoose(name);
-    const t = normLoose("Stock nulo");
-    return n === t;
-  };
+  const isStockNulo = (name) => normLoose(name) === normLoose("01-STOCK NULO") || normLoose(name) === normLoose("Stock nulo");
+
   const colorByName = {};
   let palIdx = 0;
   items.forEach(it => {
@@ -205,18 +226,11 @@ function buildDonut(items, total) {
     }
   });
 
-  const seriesData = items.map(it => {
-    const isSN = isStockNulo(it.estado);
-    return ({
-      name: it.estado,
-      value: it.qty,
-      itemStyle: { color: colorByName[it.estado] },
-      ...(isSN ? {
-        label: { color: "#ef4444", fontWeight: 950 },
-        labelLine: { lineStyle: { color: "#ef4444", width: 2 } }
-      } : {})
-    });
-  });
+  const seriesData = items.map(it => ({
+    name: it.estado,
+    value: it.qty,
+    itemStyle: { color: colorByName[it.estado] }
+  }));
 
   chartDonut = echarts.init(host, null, { renderer: "canvas" });
 
@@ -251,14 +265,12 @@ function buildDonut(items, total) {
     }]
   });
 
-  // leyenda custom (orden ya viene desde calcEstados)
+  // ✅ leyenda custom ordenada (items ya viene ordenado 01..04)
   items.forEach(it => {
     const c = colorByName[it.estado] || "#64748b";
 
     const card = document.createElement("div");
     card.className = "legend-card";
-    card.setAttribute("role", "button");
-    card.setAttribute("tabindex", "0");
 
     const dot = document.createElement("span");
     dot.className = "legend-dot";
@@ -291,12 +303,14 @@ function buildDonut(items, total) {
     legend.appendChild(card);
   });
 
-  const onResize = () => { try { chartDonut && chartDonut.resize(); } catch(e) {} };
-  window.addEventListener("resize", onResize, { passive: true });
+  window.addEventListener("resize", () => {
+    try { chartDonut && chartDonut.resize(); } catch(e) {}
+  }, { passive: true });
 }
 
 /* ============================
-   VALORIZACIÓN STOCK (TABLA)
+   VALORIZACIÓN STOCK (TABLA REAL)
+   - Usa RUBRO + Valor libre utilización (como tu 2da imagen)
 =========================== */
 
 function buildValorizacionStock(rows) {
@@ -308,14 +322,25 @@ function buildValorizacionStock(rows) {
 
   tb.innerHTML = "";
 
-  // Si ya tenés lógica previa de valorización por rubro en tu versión, dejala.
-  // Acá dejamos un fallback simple: suma Libre Utilización (si existe) por "estado".
+  // Si no existen columnas, no rompemos nada: dejamos la tabla vacía con un hint
+  if (!COL_RUBRO || !COL_VALOR) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.innerHTML = `<span class="hint">No encuentro columnas de valorización (RUBRO / Valor libre utilización).</span>`;
+    tr.appendChild(td);
+    tb.appendChild(tr);
+    safeSetText("valTotal", "-");
+    return;
+  }
+
+  // Agrupar por rubro sumando valor
   const map = new Map();
   let total = 0;
 
   for (const r of rows) {
-    const rubro = clean(r[COL_ESTADO]) || "(Sin estado)";
-    const v = toNum(r[COL_LIBRE]);
+    const rubro = clean(r[COL_RUBRO]) || "(Sin rubro)";
+    const v = toNum(r[COL_VALOR]);
     if (!isFinite(v)) continue;
     total += v;
     map.set(rubro, (map.get(rubro) || 0) + v);
@@ -340,11 +365,11 @@ function buildValorizacionStock(rows) {
 
     const tdP = document.createElement("td");
     tdP.className = "num";
-    tdP.textContent = (pct * 100).toFixed(2).replace(".", ",") + "%";
+    tdP.textContent = (pct * 100).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 
     const tdA = document.createElement("td");
     tdA.className = "num";
-    tdA.textContent = (acum * 100).toFixed(2).replace(".", ",") + "%";
+    tdA.textContent = (acum * 100).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 
     tr.appendChild(tdR);
     tr.appendChild(tdV);
@@ -371,6 +396,8 @@ function applyAll() {
 
   const e = calcEstados(rows);
   buildDonut(e.items, e.total);
+
+  // ✅ tabla como antes
   buildValorizacionStock(rows);
 }
 
@@ -402,10 +429,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
       headers = m[0].map(clean);
 
-      COL_CLIENT = byFirstExisting(CLIENT_CANDIDATES);
+      COL_CLIENT  = byFirstExisting(CLIENT_CANDIDATES);
       COL_MATERIAL = byFirstExisting(MATERIAL_CANDIDATES);
-      COL_LIBRE = byFirstExisting(LIBRE_CANDIDATES);
-      COL_ESTADO = byFirstExisting(ESTADO_CANDIDATES);
+      COL_LIBRE   = byFirstExisting(LIBRE_CANDIDATES);
+      COL_ESTADO  = byFirstExisting(ESTADO_CANDIDATES);
+
+      // ✅ columnas valorización (tu tabla)
+      COL_RUBRO   = byFirstExisting(RUBRO_CANDIDATES);
+      COL_VALOR   = byFirstExisting(VALOR_CANDIDATES);
 
       if (!COL_CLIENT || !COL_MATERIAL || !COL_LIBRE || !COL_ESTADO) {
         showError(
@@ -417,7 +448,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
       safeSetText("clienteHint", `Columna cliente: ${COL_CLIENT}`);
 
-      // construir dataRows
       dataRows = [];
       for (let i = 1; i < m.length; i++) {
         const row = m[i];
@@ -426,7 +456,7 @@ window.addEventListener("DOMContentLoaded", () => {
         dataRows.push(obj);
       }
 
-      // poblar selector clientes
+      // Selector clientes
       const sel = document.getElementById("clienteSelect");
       if (sel) {
         const uniq = new Set();
@@ -436,7 +466,6 @@ window.addEventListener("DOMContentLoaded", () => {
         });
 
         const list = [...uniq].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
-        // deja "Todos" y agrega opciones
         sel.innerHTML = `<option value="">Todos</option>` + list.map(v => `<option value="${v}">${v}</option>`).join("");
         sel.addEventListener("change", () => applyAll());
       }
