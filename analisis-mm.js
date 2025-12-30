@@ -111,7 +111,7 @@ function fmtPct(x) {
   return (x * 100).toFixed(2).replace(".", ",") + "%";
 }
 
-/* CSV parser simple (quotes safe) */
+/* CSV parser (quotes safe) */
 function parseDelimited(text, delimiter = ";") {
   const rows = [];
   let row = [];
@@ -313,11 +313,6 @@ function buildDonut(items, total) {
         color: "#0b1220"
       },
       labelLine: { show: true, length: 14, length2: 10 },
-      emphasis: {
-        scale: true,
-        scaleSize: 8,
-        itemStyle: { shadowBlur: 12, shadowOffsetX: 0, shadowOffsetY: 2, shadowColor: "rgba(0,0,0,.25)" }
-      },
       data: seriesData
     }]
   });
@@ -401,8 +396,10 @@ function buildValorizacionStock(rows){
     tr.innerHTML = `
       <td>${d.rubro}</td>
       <td class="num">$ ${fmtMoney(d.valor)}</td>
-      <td class="num">${pct.toFixed(2).replace(".", ",")}%</td>
-      <td class="num">${pctAcc.toFixed(2).replace(".", ",")}%</td>
+      <td class="num">${pct.toFixed(2).replace(".", ",")}%
+      </td>
+      <td class="num">${pctAcc.toFixed(2).replace(".", ",")}%
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -416,28 +413,24 @@ function buildValorizacionStock(rows){
 ============================ */
 function parseMesKey(s) {
   const v = clean(s);
-  if (!v) return { key: 99999999, label: "" };
+  if (!v) return { key: 99999999 };
 
-  // YYYY-MM o YYYY/MM
   let m = v.match(/^(\d{4})[-\/](\d{1,2})$/);
-  if (m) return { key: (+m[1])*100 + (+m[2]), label: v };
+  if (m) return { key: (+m[1])*100 + (+m[2]) };
 
-  // MM/YYYY
   m = v.match(/^(\d{1,2})[-\/](\d{4})$/);
-  if (m) return { key: (+m[2])*100 + (+m[1]), label: v };
+  if (m) return { key: (+m[2])*100 + (+m[1]) };
 
-  // DD/MM/YYYY o DD-MM-YYYY (tomamos mes/año)
   m = v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
-  if (m) return { key: (+m[3])*100 + (+m[2]), label: v };
+  if (m) return { key: (+m[3])*100 + (+m[2]) };
 
-  // fallback: mantener orden alfabético al final
-  return { key: 90000000, label: v };
+  return { key: 90000000 };
 }
 
 function getEvoRowsFiltered() {
   const c = getSelectedCliente();
   if (!c) return evoData;
-  if (!EVO_COL_CLIENT) return evoData; // si no existe ALMACEN en EVOLUCION, no filtra
+  if (!EVO_COL_CLIENT) return evoData;
   return evoData.filter(r => clean(r[EVO_COL_CLIENT]) === c);
 }
 
@@ -447,19 +440,15 @@ function buildEvolucionChart() {
   const el = document.getElementById("evolucionChart");
   if (!el) return;
 
-  // si no hay data cargada, no rompe
   if (!evoData.length || !EVO_COL_MES) return;
 
   const rows = getEvoRowsFiltered();
 
-  // agregamos por MES (si hay varias filas por mes)
   const agg = new Map();
   rows.forEach(r => {
     const mes = clean(r[EVO_COL_MES]);
     if (!mes) return;
-    if (!agg.has(mes)) {
-      agg.set(mes, { prom: 0, noent: 0, at: 0, ft: 0, n: 0 });
-    }
+    if (!agg.has(mes)) agg.set(mes, { prom: 0, noent: 0, at: 0, ft: 0, n: 0 });
     const a = agg.get(mes);
     a.prom += toNumber(r[EVO_COL_PROM]);
     a.noent += toNumber(r[EVO_COL_NOENT]);
@@ -485,55 +474,17 @@ function buildEvolucionChart() {
   chartEvo.setOption({
     grid: { left: 50, right: 18, top: 30, bottom: 55 },
     tooltip: { trigger: "axis" },
-    legend: {
-      top: 0,
-      left: 0,
-      itemWidth: 14,
-      itemHeight: 10,
-      textStyle: { fontWeight: 800 }
-    },
-    xAxis: {
-      type: "category",
-      data: x,
-      axisLabel: { rotate: 35 }
-    },
+    legend: { top: 0, left: 0 },
+    xAxis: { type: "category", data: x, axisLabel: { rotate: 35 } },
     yAxis: [
-      { type: "value", name: "Cant.", nameGap: 12 },
-      { type: "value", name: "Días", nameGap: 12 }
+      { type: "value", name: "Cant." },
+      { type: "value", name: "Días" }
     ],
     series: [
-      {
-        name: "No entregados",
-        type: "bar",
-        yAxisIndex: 0,
-        data: noent,
-        itemStyle: { color: "#ef4444" }
-      },
-      {
-        name: "Entregados AT",
-        type: "bar",
-        yAxisIndex: 0,
-        data: at,
-        itemStyle: { color: "#16a34a" }
-      },
-      {
-        name: "Entregados FT",
-        type: "bar",
-        yAxisIndex: 0,
-        data: ft,
-        itemStyle: { color: "#f59e0b" }
-      },
-      {
-        name: "Promedio días de demora",
-        type: "line",
-        yAxisIndex: 1,
-        data: prom,
-        smooth: true,
-        symbol: "circle",
-        symbolSize: 7,
-        lineStyle: { width: 3 },
-        itemStyle: { color: "#1d4ed8" }
-      }
+      { name: "No entregados", type: "bar", yAxisIndex: 0, data: noent, itemStyle: { color: "#ef4444" } },
+      { name: "Entregados AT", type: "bar", yAxisIndex: 0, data: at, itemStyle: { color: "#16a34a" } },
+      { name: "Entregados FT", type: "bar", yAxisIndex: 0, data: ft, itemStyle: { color: "#f59e0b" } },
+      { name: "Promedio días de demora", type: "line", yAxisIndex: 1, data: prom, smooth: true, itemStyle: { color: "#1d4ed8" } }
     ]
   });
 
@@ -544,10 +495,7 @@ function buildEvolucionChart() {
 
 function loadEvolucion() {
   return fetch(evolUrl)
-    .then(r => {
-      if (!r.ok) throw new Error(`No pude abrir ${evolUrl} (HTTP ${r.status})`);
-      return r.text();
-    })
+    .then(r => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
     .then(text => {
       const m = parseDelimited(text, DELIM);
       if (!m.length || m.length < 2) return;
@@ -561,13 +509,7 @@ function loadEvolucion() {
       EVO_COL_AT = byFirstExisting(EVO_AT_CANDIDATES, evoHeaders);
       EVO_COL_FT = byFirstExisting(EVO_FT_CANDIDATES, evoHeaders);
 
-      // Si falta alguna, no rompemos la página: solo no dibuja evolución
-      if (!EVO_COL_MES || !EVO_COL_PROM || !EVO_COL_NOENT || !EVO_COL_AT || !EVO_COL_FT) {
-        console.warn("EVOLUCION.csv: faltan columnas para graficar", {
-          EVO_COL_MES, EVO_COL_PROM, EVO_COL_NOENT, EVO_COL_AT, EVO_COL_FT
-        });
-        return;
-      }
+      if (!EVO_COL_MES || !EVO_COL_PROM || !EVO_COL_NOENT || !EVO_COL_AT || !EVO_COL_FT) return;
 
       evoData = m.slice(1).map(row => {
         const o = {};
@@ -577,9 +519,7 @@ function loadEvolucion() {
 
       buildEvolucionChart();
     })
-    .catch(err => {
-      console.warn("No se pudo cargar EVOLUCION.csv", err);
-    });
+    .catch(() => {});
 }
 
 /* ============================
@@ -597,33 +537,24 @@ function applyAll() {
   buildDonut(e.items, e.total);
   buildValorizacionStock(rows);
 
-  // ✅ evolución se recalcula con el filtro actual
-  buildEvolucionChart();
+  buildEvolucionChart(); // mantiene EVOLUCIÓN con filtro
 }
 
 /* ============================
    INIT
 ============================ */
 window.addEventListener("DOMContentLoaded", () => {
-  // fecha “hoy”
   const d = new Date();
   safeSetText(
     "lastUpdate",
     `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
   );
 
-  // Cargar ANALISIS-MM
   fetch(csvUrl)
-    .then(r => {
-      if (!r.ok) throw new Error(`No pude abrir ${csvUrl} (HTTP ${r.status})`);
-      return r.text();
-    })
+    .then(r => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
     .then(text => {
       const m = parseDelimited(text, DELIM);
-      if (!m.length || m.length < 2) {
-        showError("El CSV está vacío o no tiene filas.");
-        return;
-      }
+      if (!m.length || m.length < 2) { showError("El CSV está vacío o no tiene filas."); return; }
 
       headers = m[0].map(clean);
 
@@ -639,10 +570,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!COL_ESTADO) missing.push("Estado");
 
       if (missing.length) {
-        showError(
-          `Faltan columnas en ${csvUrl}: ${missing.join(", ")}<br>` +
-          `Revisá encabezados (mayúsculas/acentos).`
-        );
+        showError(`Faltan columnas en ${csvUrl}: ${missing.join(", ")}`);
         return;
       }
 
@@ -654,15 +582,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
       renderClientes();
 
-      // ✅ Cargar EVOLUCIÓN (en paralelo “lógico”)
-      loadEvolucion().finally(() => {
-        applyAll();
-      });
+      // carga evolución y luego aplica todo
+      loadEvolucion().finally(() => applyAll());
 
       document.getElementById("clienteSelect")?.addEventListener("change", applyAll);
     })
-    .catch(err => {
-      console.error(err);
-      showError(`Error cargando ${csvUrl}. Revisá el nombre EXACTO y que esté en la raíz del repo.`);
-    });
+    .catch(() => showError(`Error cargando ${csvUrl}. Revisá el nombre EXACTO y que esté en la raíz del repo.`));
 });
+
