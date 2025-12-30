@@ -26,8 +26,6 @@ let chartDonut = null;
 /* ============================
    HELPERS
 ============================ */
-
-/* ===== Header normalization helpers (accents/spaces/BOM) ===== */
 function normalizeHeaderName(s){
   if (s == null) return "";
   return String(s)
@@ -62,8 +60,6 @@ function safeSetText(id, text) {
 function toNumber(v) {
   let x = clean(v);
   if (!x) return 0;
-  x = x.replace(/\s/g, "");
-  // 1.234,56 o 1234,56
   if (x.includes(",")) x = x.replace(/\./g, "").replace(",", ".");
   const n = Number(x);
   return Number.isFinite(n) ? n : 0;
@@ -74,66 +70,12 @@ function fmtInt(n) {
 }
 
 function fmtMoney(n) {
-  const x = Number(n || 0);
-  return x.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function parseMoney(v){
-  if (v == null) return 0;
-  // admite: "78.506.400,32" o "$ 78.506.400,32"
-  const s = String(v).trim().replace(/[^0-9,.-]+/g, "");
-  if (!s) return 0;
-  // si viene con coma decimal, eliminar separadores de miles
-  if (s.includes(",") && s.lastIndexOf(",") > s.lastIndexOf(".")) {
-    return Number(s.replace(/\./g, "").replace(",", ".")) || 0;
-  }
-  // si viene con punto decimal
-  return Number(s.replace(/,/g, "")) || 0;
+  return Number(n || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function fmtPct(x) {
   if (!isFinite(x)) return "-";
   return (x * 100).toFixed(2).replace(".", ",") + "%";
-}
-
-/* CSV parser simple (quotes safe) */
-function parseDelimited(text, delimiter = ";") {
-  const rows = [];
-  let row = [];
-  let cur = "";
-  let inQuotes = false;
-
-  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-
-    if (ch === '"') {
-      if (inQuotes && text[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (ch === delimiter && !inQuotes) {
-      row.push(cur);
-      cur = "";
-    } else if (ch === "\n" && !inQuotes) {
-      row.push(cur);
-      rows.push(row);
-      row = [];
-      cur = "";
-    } else {
-      cur += ch;
-    }
-  }
-
-  if (cur || row.length) {
-    row.push(cur);
-    rows.push(row);
-  }
-
-  return rows;
 }
 
 /* ============================
@@ -148,26 +90,6 @@ function filteredRows() {
   const c = getSelectedCliente();
   if (!c) return data;
   return data.filter(r => clean(r[COL_CLIENT]) === c);
-}
-
-/* ============================
-   UI: CLIENTES
-============================ */
-function renderClientes() {
-  const sel = document.getElementById("clienteSelect");
-  if (!sel) return;
-
-  sel.querySelectorAll("option:not([value=''])").forEach(o => o.remove());
-
-  const clientes = [...new Set(data.map(r => clean(r[COL_CLIENT])).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, "es"));
-
-  for (const c of clientes) {
-    const o = document.createElement("option");
-    o.value = c;
-    o.textContent = c;
-    sel.appendChild(o);
-  }
 }
 
 /* ============================
@@ -194,7 +116,6 @@ function calcKPIs(rows) {
 }
 
 function calcEstados(rows) {
-  // Estado -> Set(material)
   const map = new Map();
 
   for (const r of rows) {
@@ -206,219 +127,91 @@ function calcEstados(rows) {
     map.get(estado).add(mat);
   }
 
-  const items = [...map.entries()].map(([estado, setMat]) => ({
+  let items = [...map.entries()].map(([estado, setMat]) => ({
     estado,
     qty: setMat.size
   }));
 
-  items.sort((a, b) => b.qty - a.qty);
+  /* =====================================================
+     🔹 ORDEN FORZADO DE LEYENDA: 01 → 04 (CAMBIO ÚNICO)
+  ===================================================== */
+  items.sort((a, b) => {
+    const na = parseInt(a.estado, 10);
+    const nb = parseInt(b.estado, 10);
+
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    if (!isNaN(na)) return -1;
+    if (!isNaN(nb)) return 1;
+
+    return a.estado.localeCompare(b.estado, "es");
+  });
 
   const total = items.reduce((s, x) => s + x.qty, 0);
-
   return { items, total };
 }
 
 /* ============================
-   RENDER: TABLA + DONA
+   DONUT
 ============================ */
-function renderEstadosTable(items, total) {
-  const tb = document.getElementById("estadosTbody");
-  if (!tb) return;
-
-  tb.innerHTML = "";
-
-  if (!items.length) {
-    tb.innerHTML = `<tr><td colspan="3" class="muted">Sin datos</td></tr>`;
-    return;
-  }
-
-  for (const it of items) {
-    const tr = document.createElement("tr");
-
-    const tdE = document.createElement("td");
-    tdE.textContent = it.estado;
-
-    const tdQ = document.createElement("td");
-    tdQ.className = "num";
-    tdQ.textContent = fmtInt(it.qty);
-
-    const tdP = document.createElement("td");
-    tdP.className = "num";
-    const p = total ? it.qty / total : 0;
-    tdP.textContent = fmtPct(p);
-
-    tr.appendChild(tdE);
-    tr.appendChild(tdQ);
-    tr.appendChild(tdP);
-    tb.appendChild(tr);
-  }
-
-  // total
-  const trT = document.createElement("tr");
-  trT.className = "total-row";
-
-  const tdTE = document.createElement("td");
-  tdTE.textContent = "Total";
-
-  const tdTQ = document.createElement("td");
-  tdTQ.className = "num";
-  tdTQ.textContent = fmtInt(total);
-
-  const tdTP = document.createElement("td");
-  tdTP.className = "num";
-  tdTP.textContent = "100,00%";
-
-  trT.appendChild(tdTE);
-  trT.appendChild(tdTQ);
-  trT.appendChild(tdTP);
-  tb.appendChild(trT);
-}
-
-
 function buildDonut(items, total) {
-  if (!window.echarts) {
-    console.warn('ECharts no cargó: revisá el <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js">');
-    return;
-  }
-
   const host = document.getElementById("donutEstados");
   const legend = document.getElementById("donutLegend");
-  if (!host || !legend) return;
+  if (!host || !legend || !window.echarts) return;
 
   legend.innerHTML = "";
+  if (chartDonut) chartDonut.dispose();
 
-  if (chartDonut) {
-    try { chartDonut.dispose(); } catch(e) {}
-    chartDonut = null;
-  }
+  chartDonut = echarts.init(host);
 
-  // paleta base + forzar "Stock nulo" rojo
-  const palette = [
-    "#1d4ed8", "#16a34a", "#f59e0b", "#7c3aed", "#0ea5e9",
-    "#10b981", "#a3a3a3", "#eab308", "#14b8a6", "#fb7185"
-  ];
-  const norm = (s) => normalizeHeaderName(s);
-  const normLoose = (s) => norm(s)
-    .replace(/^[0-9]+\s*[-.:_\s]*/g, "")   // quita prefijo "01-" etc.
-    .replace(/[_\-\s]+/g, " ")
-    .trim();
+  const palette = ["#ef4444", "#f59e0b", "#16a34a", "#2563eb"];
 
-  const isStockNulo = (name) => {
-    const n = normLoose(name);
-    const t = normLoose("Stock nulo");
-    return n === t;
-  };
-  const colorByName = {};
-  let palIdx = 0;
-  items.forEach(it => {
-    if (isStockNulo(it.estado)) colorByName[it.estado] = "#ef4444";
-    else {
-      colorByName[it.estado] = palette[palIdx % palette.length];
-      palIdx++;
-    }
-  });
-
-    const seriesData = items.map(it => {
-    const isSN = isStockNulo(it.estado);
-    return ({
-      name: it.estado,
-      value: it.qty,
-      itemStyle: { color: colorByName[it.estado] },
-      // forzar estilos en etiqueta y línea SOLO para Stock nulo
-      ...(isSN ? {
-        label: { color: "#ef4444", fontWeight: 950 },
-        labelLine: { lineStyle: { color: "#ef4444", width: 2 } }
-      } : {})
-    });
-  });
-chartDonut = echarts.init(host, null, { renderer: "canvas" });
+  const seriesData = items.map((it, i) => ({
+    name: it.estado,
+    value: it.qty,
+    itemStyle: { color: palette[i % palette.length] }
+  }));
 
   chartDonut.setOption({
     tooltip: {
       trigger: "item",
-      formatter: (p) => {
-        const v = p.value || 0;
-        const pct = total ? ((v / total) * 100) : 0;
-        return `${p.name}<br/>${fmtInt(v)} materiales (${pct.toFixed(2).replace(".", ",")}%)`;
-      }
+      formatter: p => `${p.name}<br>${fmtInt(p.value)} (${fmtPct(p.value / total)})`
     },
     series: [{
       type: "pie",
-      radius: ["45%", "78%"],
-      center: ["50%", "48%"],
-      minAngle: 2,
-      padAngle: 2,
-      itemStyle: { borderColor: "rgba(255,255,255,.95)", borderWidth: 2 },
-      label: {
-        show: true,
-        formatter: (p) => {
-          const v = p.value || 0;
-          if (!total) return "";
-          const pct = (v / total) * 100;
-          // evita amontonar: oculta etiquetas muy chicas
-          if (pct < 3) return "";
-          return `${p.name}
-${pct.toFixed(0)}%`;
-        },
-        fontWeight: 950,
-        fontSize: 12,
-        color: "#0b1220"
-      },
-      labelLine: { show: true, length: 14, length2: 10 },
-      emphasis: {
-        scale: true,
-        scaleSize: 8,
-        itemStyle: { shadowBlur: 12, shadowOffsetX: 0, shadowOffsetY: 2, shadowColor: "rgba(0,0,0,.25)" }
-      },
+      radius: ["45%", "75%"],
+      label: { show: true },
       data: seriesData
     }]
   });
 
-  // leyenda tipo "callouts"
-  items.forEach((it) => {
-    const p = total ? it.qty / total : 0;
-    const pct = (p * 100).toFixed(0) + "%";
-    const c = colorByName[it.estado] || "#2d6cdf";
+  // leyenda custom
+  items.forEach((it, i) => {
+    const pct = total ? Math.round((it.qty / total) * 100) : 0;
 
     const card = document.createElement("div");
     card.className = "callout";
-    if (typeof isStockNulo === "function" && isStockNulo(it.estado)) card.classList.add("is-stock-nulo");
 
     const dot = document.createElement("span");
     dot.className = "callout-dot";
-    dot.style.background = c;
+    dot.style.background = palette[i % palette.length];
 
     const body = document.createElement("div");
-
-    const title = document.createElement("div");
-    title.className = "callout-title";
-    title.textContent = it.estado;
-
-    const big = document.createElement("div");
-    big.className = "callout-pct";
-    big.style.color = c;
-    big.textContent = pct;
-
-    const sub = document.createElement("div");
-    sub.className = "callout-sub";
-    sub.textContent = `${fmtInt(it.qty)} materiales`;
-
-    body.appendChild(title);
-    body.appendChild(big);
-    body.appendChild(sub);
+    body.innerHTML = `
+      <div class="callout-title">${it.estado}</div>
+      <div class="callout-pct">${pct}%</div>
+      <div class="callout-sub">${fmtInt(it.qty)} materiales</div>
+    `;
 
     card.appendChild(dot);
     card.appendChild(body);
     legend.appendChild(card);
   });
 
-  const onResize = () => { try { chartDonut && chartDonut.resize(); } catch(e) {} };
-  window.addEventListener("resize", onResize, { passive: true });
+  window.addEventListener("resize", () => chartDonut.resize());
 }
 
-
 /* ============================
-   APPLY ALL
+   APPLY
 ============================ */
 function applyAll() {
   const rows = filteredRows();
@@ -429,132 +222,31 @@ function applyAll() {
   safeSetText("kpiPct", fmtPct(k.pct));
 
   const e = calcEstados(rows);
-  // Tabla de estados eliminada
-buildDonut(e.items, e.total);
-  buildValorizacionStock(rows);
+  buildDonut(e.items, e.total);
 }
 
 /* ============================
    INIT
 ============================ */
 window.addEventListener("DOMContentLoaded", () => {
-  // Delegación de eventos: asegura que los botones funcionen siempre
-  document.addEventListener("click", (ev) => {
-    const t = ev.target.closest && ev.target.closest("button");
-    if (!t) return;
-    if (t.id === "btnDLStockNulo") return downloadByKind("stock_nulo");
-    if (t.id === "btnDLMenorPP") return downloadByKind("menor_pp");
-    if (t.id === "btnDLMayorStockMax") return downloadByKind("mayor_stock_max");
-  });
-
-  // fecha “hoy” arriba
-  const d = new Date();
-  safeSetText(
-    "lastUpdate",
-    `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
-  );
-
   fetch(csvUrl)
-    .then(r => {
-      if (!r.ok) throw new Error(`No pude abrir ${csvUrl} (HTTP ${r.status})`);
-      return r.text();
-    })
+    .then(r => r.text())
     .then(text => {
-      const m = parseDelimited(text, DELIM);
-      if (!m.length || m.length < 2) {
-        showError("El CSV está vacío o no tiene filas.");
-        return;
-      }
-
-      headers = m[0].map(clean);
+      const rows = text.split("\n").map(r => r.split(DELIM));
+      headers = rows[0];
 
       COL_CLIENT = byFirstExisting(CLIENT_CANDIDATES);
       COL_MATERIAL = byFirstExisting(MATERIAL_CANDIDATES);
       COL_LIBRE = byFirstExisting(LIBRE_CANDIDATES);
       COL_ESTADO = byFirstExisting(ESTADO_CANDIDATES);
 
-      const missing = [];
-      if (!COL_CLIENT) missing.push("ALMACEN");
-      if (!COL_MATERIAL) missing.push("Material");
-      if (!COL_LIBRE) missing.push("Libre utilización");
-      if (!COL_ESTADO) missing.push("Estado");
-
-      if (missing.length) {
-        showError(
-          `Faltan columnas en ${csvUrl}: ${missing.join(", ")}<br>` +
-          `Revisá encabezados (mayúsculas/acentos). Probé Libre: ${LIBRE_CANDIDATES.join(" / ")}`
-        );
-        return;
-      }
-
-      // armar objetos
-      data = m.slice(1).map(row => {
+      data = rows.slice(1).map(r => {
         const o = {};
-        headers.forEach((h, i) => (o[h] = clean(row[i])));
+        headers.forEach((h, i) => o[h] = r[i]);
         return o;
       });
 
-      safeSetText("clienteHint", `Columna cliente: ${COL_CLIENT}`);
-
-      renderClientes();
       applyAll();
-
-      document.getElementById("clienteSelect")?.addEventListener("change", applyAll);
-
-      document.getElementById("btnReset")?.addEventListener("click", () => {
-        const sel = document.getElementById("clienteSelect");
-        if (sel) sel.value = "";
-        applyAll();
-      });
     })
-    .catch(err => {
-      console.error(err);
-      showError(`Error cargando ${csvUrl}. Revisá el nombre EXACTO y que esté en la raíz del repo.`);
-    });
+    .catch(() => showError("Error cargando ANALISIS-MM.csv"));
 });
-
-
-
-function buildValorizacionStock(rows){
-  const table = document.getElementById("tablaValorizacion");
-  if (!table) return;
-
-  const colRubro = "Rubro";
-  const colValor = "Valor libre utilización";
-
-  const agg = new Map();
-  rows.forEach(r => {
-    const rub = (r[colRubro] || "").trim();
-    if (!rub) return;
-    const val = parseMoney(r[colValor]);
-    agg.set(rub, (agg.get(rub) || 0) + (isFinite(val) ? val : 0));
-  });
-
-  const data = Array.from(agg.entries())
-    .map(([rubro, valor]) => ({ rubro, valor }))
-    .sort((a,b) => b.valor - a.valor);
-
-  const total = data.reduce((s,d) => s + d.valor, 0);
-  let acc = 0;
-
-  const tbody = table.querySelector("tbody");
-  tbody.innerHTML = "";
-
-  data.forEach(d => {
-    acc += d.valor;
-    const pct = total ? (d.valor / total * 100) : 0;
-    const pctAcc = total ? (acc / total * 100) : 0;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.rubro}</td>
-      <td class="num">$ ${fmtMoney(d.valor)}</td>
-      <td class="num">${pct.toFixed(2).replace(".", ",")}%</td>
-      <td class="num">${pctAcc.toFixed(2).replace(".", ",")}%</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  const valTotal = document.getElementById("valTotal");
-  if (valTotal) valTotal.textContent = `$ ${fmtMoney(total)}`;
-}
