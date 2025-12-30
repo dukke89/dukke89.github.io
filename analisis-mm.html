@@ -6,7 +6,7 @@
   <title>ABASTECIMIENTO</title>
 
   <link rel="stylesheet" href="base.css" />
-  <link rel="stylesheet" href="analisis-mm.css?v=2025123002" />
+  <link rel="stylesheet" href="analisis-mm.css?v=20251230" />
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 
@@ -34,7 +34,7 @@
   <main class="container">
     <div id="msg"></div>
 
-    <!-- FILTRO (SIN BOTONES) -->
+    <!-- FILTRO -->
     <section class="panel">
       <div class="panel-body mm-filter-row">
         <div class="filter">
@@ -47,7 +47,6 @@
 
         <div class="filter mm-source">
           <div class="hint"><b>Fuente:</b> <span id="mmSourceName">ANALISIS-MM.csv</span> (delimitador “;”)</div>
-          <div class="hint"><b>Evolución:</b> <span>EVOLUCION.csv</span></div>
         </div>
       </div>
     </section>
@@ -91,6 +90,8 @@
       <div class="panel-body">
         <div class="mm-card">
           <div class="mm-two">
+
+            <!-- Bloque 1: Gráfico circular + leyenda -->
             <div class="mm-block">
               <div class="mm-block-title">ESTADOS</div>
               <div class="mm-donut-wrap">
@@ -99,6 +100,7 @@
               <div class="mm-legend" id="donutLegend" aria-label="Leyenda del gráfico"></div>
             </div>
 
+            <!-- Bloque 2: Tabla valorización -->
             <div class="mm-block">
               <div class="mm-block-title">VALORIZACIÓN DE STOCK</div>
               <div class="mm-table-wrap mm-table-wrap-scroll">
@@ -123,28 +125,37 @@
                 </table>
               </div>
             </div>
-          </div>
 
-          <div class="footnote" style="margin-top:10px">
-            Fuente: <b>ANALISIS-MM.csv</b> · Filtro: <b>ALMACEN</b>.
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ✅ EVOLUCIÓN (SE MANTIENE) -->
+    <!-- EVOLUCIÓN -->
     <section class="panel">
       <div class="panel-title">EVOLUCIÓN POR MES</div>
       <div class="panel-body">
-        <div id="evolucionChart" style="width:100%; height:360px;"></div>
+        <div class="mm-card">
+          <div class="mm-card-title">Cantidad por mes y % disponibilidad</div>
+
+          <div style="margin-bottom:10px">
+            <label><b>OBRA:</b></label>
+            <select id="obraSelect">
+              <option value="">Todas</option>
+            </select>
+          </div>
+
+          <div id="chartEvolucion" style="width:100%;height:420px;"></div>
+        </div>
       </div>
     </section>
 
     <footer class="footnote">
-      Fuente: <b>ANALISIS-MM.csv</b> y <b>EVOLUCION.csv</b>.
+      Fuente: <b>ANALISIS-MM.csv</b> · Filtro: <b>ALMACEN</b> · Cálculos: materiales distintos (Material) y disponibles (Libre utilización &gt; 0).
     </footer>
   </main>
 
-  <script src="analisis-mm.js?v=2025123002"></script>
+  <script src="analisis-mm.js?v=20251230"></script>
+  <script src="evolucion.js"></script>
 </body>
 </html>
