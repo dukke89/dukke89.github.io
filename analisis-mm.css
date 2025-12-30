@@ -1,0 +1,114 @@
+/* ===== Análisis MM (tabla al lado del donut) ===== */
+
+.page-mm .mm-two{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:14px;
+}
+
+@media (min-width: 1100px){
+  .page-mm .mm-two{
+    grid-template-columns: 1fr 1fr;
+    align-items:start;
+  }
+}
+
+.page-mm .mm-block{
+  background:#fff;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 1px 10px rgba(0,0,0,.06);
+}
+
+.page-mm .mm-donut-wrap{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.page-mm .mm-donut{
+  width:100%;
+  height:320px;
+}
+
+.page-mm .mm-legend{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+}
+
+@media (min-width: 1100px){
+  .page-mm .mm-legend{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.page-mm .legend-card{
+  display:flex;
+  gap:10px;
+  padding:12px;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:12px;
+}
+
+.page-mm .legend-dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin-top:6px;
+}
+
+.page-mm .legend-title{
+  font-weight:900;
+  font-size:13px;
+}
+
+.page-mm .callout-pct{
+  font-size:22px;
+  font-weight:900;
+}
+
+.page-mm .callout-sub{
+  font-size:12px;
+  opacity:.85;
+}
+
+.page-mm .mm-table-wrap-scroll{
+  max-height:320px;
+  overflow:auto;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.08);
+}
+
+.page-mm .mm-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.page-mm .mm-table th,
+.page-mm .mm-table td{
+  padding:10px;
+  border-bottom:1px solid rgba(0,0,0,.07);
+}
+
+.page-mm .mm-table thead th{
+  position:sticky;
+  top:0;
+  background:#f6f7fb;
+  font-weight:900;
+}
+
+.page-mm .mm-table .num{
+  text-align:right;
+}
+
+.page-mm .mm-table tfoot td{
+  position:sticky;
+  bottom:0;
+  background:#0b1220;
+  color:#fff;
+  font-weight:900;
+}
