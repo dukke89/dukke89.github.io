@@ -303,7 +303,7 @@
 
 /* Tabla: mostrar ~10 filas y luego scroll vertical */
 .page-mm .mm-table-wrap-scroll{
-  max-height: 620px; /* aprox 10 filas + header + footer */
+  max-height: 520px; /* aprox 10 filas + header + footer */
   overflow-y: auto;
   overflow-x: hidden;
 }
