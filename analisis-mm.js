@@ -1,19 +1,19 @@
 /* ============================
-   CONFIG
+   ANALISIS-MM.js (COMPLETO)
 =========================== */
 
 const CSV_PATH = "ANALISIS-MM.csv";
 const DELIM = ";";
 
 // Columnas posibles (tolerantes a variantes)
-const CLIENT_CANDIDATES  = ["ALMACEN", "Cliente", "CLIENTE", "OBRA", "CENTRO"];
+const CLIENT_CANDIDATES   = ["ALMACEN", "Cliente", "CLIENTE", "OBRA", "CENTRO"];
 const MATERIAL_CANDIDATES = ["Material", "MATERIAL", "Código Item", "CODIGO ITEM", "Codigo Item", "CODIGO"];
-const LIBRE_CANDIDATES   = ["Libre utilizacion", "Libre utilización", "LIBRE UTILIZACION", "LIBRE UTILIZACIÓN", "LIBRE", "Libre"];
-const ESTADO_CANDIDATES  = ["Estado", "ESTADO", "estado"];
+const LIBRE_CANDIDATES    = ["Libre utilizacion", "Libre utilización", "LIBRE UTILIZACION", "LIBRE UTILIZACIÓN", "LIBRE", "Libre"];
+const ESTADO_CANDIDATES   = ["Estado", "ESTADO", "estado"];
 
-// 👇 Para valorización real (tu segunda imagen)
-const RUBRO_CANDIDATES   = ["RUBRO", "Rubro", "rubro", "CLASIFICACION", "CLASIFICACIÓN"];
-const VALOR_CANDIDATES   = [
+// Para Valorización real (tabla)
+const RUBRO_CANDIDATES = ["RUBRO", "Rubro", "rubro", "CLASIFICACION", "CLASIFICACIÓN"];
+const VALOR_CANDIDATES = [
   "Valor libre utilización", "Valor libre utilizacion",
   "VALOR LIBRE UTILIZACION", "VALOR LIBRE UTILIZACIÓN",
   "VALOR", "Valor"
@@ -93,7 +93,7 @@ function parseDelimited(text, delim) {
   return lines.map(line => line.split(delim));
 }
 
-// ✅ num parser robusto: soporta "$ 1.234.567,89", espacios, etc.
+// ✅ Parser numérico robusto: "$ 1.234.567,89" -> 1234567.89
 function toNum(val) {
   let s = String(val ?? "").trim();
   if (!s) return NaN;
@@ -101,9 +101,6 @@ function toNum(val) {
   // deja solo dígitos, separadores y signo
   s = s.replace(/[^0-9,.\-]/g, "");
 
-  // Caso AR: 1.234.567,89  -> 1234567.89
-  // Caso simple: 1234,56 -> 1234.56
-  // Caso US: 1234.56 -> 1234.56 (no tocamos)
   const hasComma = s.includes(",");
   const hasDot = s.includes(".");
 
@@ -113,12 +110,20 @@ function toNum(val) {
   } else if (hasComma && !hasDot) {
     // coma decimal
     s = s.replace(",", ".");
-  } else {
-    // dot decimal o entero: dejamos
-  }
+  } // else: dot decimal o entero -> dejamos
 
   const n = Number(s);
   return isFinite(n) ? n : NaN;
+}
+
+function getCodeFromLabel(label) {
+  const m = String(label || "").trim().match(/^(\d{2})/);
+  return m ? m[1] : "";
+}
+
+function prefNum(label) {
+  const m = String(label || "").trim().match(/^\s*(\d{1,3})\b/);
+  return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
 }
 
 /* ============================
@@ -178,11 +183,7 @@ function calcEstados(rows) {
     qty: setMat.size
   }));
 
-  // ✅ Orden por prefijo numérico 01..04
-  const prefNum = (s) => {
-    const m = String(s || "").trim().match(/^\s*(\d{1,3})\b/);
-    return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
-  };
+  // ✅ Orden 01..04 (y luego alfabético)
   items.sort((a, b) => {
     const na = prefNum(a.estado);
     const nb = prefNum(b.estado);
@@ -195,11 +196,14 @@ function calcEstados(rows) {
 }
 
 /* ============================
-   RENDER: DONA + LEYENDA
+   DONUT + LEYENDA (COLORES FIJOS)
 =========================== */
 
 function buildDonut(items, total) {
-  if (!window.echarts) return;
+  if (!window.echarts) {
+    console.warn("ECharts no cargó.");
+    return;
+  }
 
   const host = document.getElementById("donutEstados");
   const legend = document.getElementById("donutLegend");
@@ -213,26 +217,29 @@ function buildDonut(items, total) {
     return;
   }
 
-  const palette = ["#2563eb", "#16a34a", "#f59e0b", "#8b5cf6", "#0ea5e9", "#22c55e", "#f97316", "#64748b"];
-  const isStockNulo = (name) => normLoose(name) === normLoose("01-STOCK NULO") || normLoose(name) === normLoose("Stock nulo");
+  // 🎨 COLORES FIJOS POR CÓDIGO
+  const COLOR_MAP = {
+    "01": "#ef4444", // rojo
+    "02": "#f59e0b", // naranja
+    "03": "#16a34a", // verde
+    "04": "#2563eb"  // azul (cambiable)
+  };
 
-  const colorByName = {};
-  let palIdx = 0;
-  items.forEach(it => {
-    if (isStockNulo(it.estado)) colorByName[it.estado] = "#ef4444";
-    else {
-      colorByName[it.estado] = palette[palIdx % palette.length];
-      palIdx++;
-    }
+  const seriesData = items.map(it => {
+    const code = getCodeFromLabel(it.estado);
+    return {
+      name: it.estado,
+      value: it.qty,
+      itemStyle: { color: COLOR_MAP[code] || "#64748b" }
+    };
   });
 
-  const seriesData = items.map(it => ({
-    name: it.estado,
-    value: it.qty,
-    itemStyle: { color: colorByName[it.estado] }
-  }));
-
-  chartDonut = echarts.init(host, null, { renderer: "canvas" });
+  // crear/reusar instancia
+  if (!chartDonut) {
+    chartDonut = echarts.init(host, null, { renderer: "canvas" });
+  } else {
+    chartDonut.clear();
+  }
 
   chartDonut.setOption({
     tooltip: {
@@ -247,15 +254,15 @@ function buildDonut(items, total) {
       type: "pie",
       radius: ["45%", "78%"],
       center: ["50%", "48%"],
-      minAngle: 2,
+      minAngle: 3,
       padAngle: 2,
-      itemStyle: { borderColor: "rgba(255,255,255,.95)", borderWidth: 2 },
+      itemStyle: { borderColor: "#fff", borderWidth: 2 },
       label: {
         show: true,
         formatter: (p) => {
           const v = p.value || 0;
-          if (!total) return "";
-          const pct = (v / total) * 100;
+          const pct = total ? (v / total) * 100 : 0;
+          // ocultar etiquetas muy chicas
           if (pct < 3) return "";
           return `${p.name}\n${pct.toFixed(0)}%`;
         }
@@ -265,52 +272,35 @@ function buildDonut(items, total) {
     }]
   });
 
-  // ✅ leyenda custom ordenada (items ya viene ordenado 01..04)
+  // Leyenda custom (ordenada)
   items.forEach(it => {
-    const c = colorByName[it.estado] || "#64748b";
+    const code = getCodeFromLabel(it.estado);
+    const color = COLOR_MAP[code] || "#64748b";
+    const pct = total ? ((it.qty / total) * 100).toFixed(0) + "%" : "-";
 
     const card = document.createElement("div");
     card.className = "legend-card";
 
-    const dot = document.createElement("span");
-    dot.className = "legend-dot";
-    dot.style.background = c;
+    card.innerHTML = `
+      <span class="legend-dot" style="background:${color}"></span>
+      <div class="legend-body">
+        <div class="legend-title">${it.estado}</div>
+        <div class="callout-pct" style="color:${color}">${pct}</div>
+        <div class="callout-sub">${fmtInt(it.qty)} materiales</div>
+      </div>
+    `;
 
-    const body = document.createElement("div");
-    body.className = "legend-body";
-
-    const title = document.createElement("div");
-    title.className = "legend-title";
-    title.textContent = it.estado;
-
-    const pct = total ? ((it.qty / total) * 100).toFixed(0) + "%" : "-";
-
-    const big = document.createElement("div");
-    big.className = "callout-pct";
-    big.style.color = c;
-    big.textContent = pct;
-
-    const sub = document.createElement("div");
-    sub.className = "callout-sub";
-    sub.textContent = `${fmtInt(it.qty)} materiales`;
-
-    body.appendChild(title);
-    body.appendChild(big);
-    body.appendChild(sub);
-
-    card.appendChild(dot);
-    card.appendChild(body);
     legend.appendChild(card);
   });
 
+  // resize
   window.addEventListener("resize", () => {
-    try { chartDonut && chartDonut.resize(); } catch(e) {}
+    try { chartDonut && chartDonut.resize(); } catch (e) {}
   }, { passive: true });
 }
 
 /* ============================
-   VALORIZACIÓN STOCK (TABLA REAL)
-   - Usa RUBRO + Valor libre utilización (como tu 2da imagen)
+   TABLA VALORIZACIÓN (RUBRO + VALOR)
 =========================== */
 
 function buildValorizacionStock(rows) {
@@ -322,7 +312,6 @@ function buildValorizacionStock(rows) {
 
   tb.innerHTML = "";
 
-  // Si no existen columnas, no rompemos nada: dejamos la tabla vacía con un hint
   if (!COL_RUBRO || !COL_VALOR) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
@@ -334,7 +323,6 @@ function buildValorizacionStock(rows) {
     return;
   }
 
-  // Agrupar por rubro sumando valor
   const map = new Map();
   let total = 0;
 
@@ -350,6 +338,7 @@ function buildValorizacionStock(rows) {
   items.sort((a, b) => b.val - a.val);
 
   let acum = 0;
+
   for (const it of items) {
     const pct = total ? it.val / total : 0;
     acum += pct;
@@ -365,11 +354,17 @@ function buildValorizacionStock(rows) {
 
     const tdP = document.createElement("td");
     tdP.className = "num";
-    tdP.textContent = (pct * 100).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+    tdP.textContent = (pct * 100).toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + "%";
 
     const tdA = document.createElement("td");
     tdA.className = "num";
-    tdA.textContent = (acum * 100).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+    tdA.textContent = (acum * 100).toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) + "%";
 
     tr.appendChild(tdR);
     tr.appendChild(tdV);
@@ -389,15 +384,17 @@ function buildValorizacionStock(rows) {
 function applyAll() {
   const rows = filteredRows();
 
+  // KPIs
   const k = calcKPIs(rows);
   safeSetText("kpiMat", fmtInt(k.totalMat));
   safeSetText("kpiDisp", fmtInt(k.dispMat));
   safeSetText("kpiPct", fmtPct(k.pct));
 
+  // Donut + leyenda
   const e = calcEstados(rows);
   buildDonut(e.items, e.total);
 
-  // ✅ tabla como antes
+  // Tabla valorización
   buildValorizacionStock(rows);
 }
 
@@ -411,12 +408,13 @@ window.addEventListener("DOMContentLoaded", () => {
   fetch(CSV_PATH, { cache: "no-store" })
     .then(r => {
       if (!r.ok) throw new Error(`No se pudo leer ${CSV_PATH} (HTTP ${r.status})`);
+
       const lm = r.headers.get("last-modified");
       if (lm) {
         try {
           const d = new Date(lm);
           safeSetText("lastUpdate", d.toLocaleDateString("es-AR"));
-        } catch(e) {}
+        } catch (e) {}
       }
       return r.text();
     })
@@ -429,25 +427,26 @@ window.addEventListener("DOMContentLoaded", () => {
 
       headers = m[0].map(clean);
 
-      COL_CLIENT  = byFirstExisting(CLIENT_CANDIDATES);
+      COL_CLIENT   = byFirstExisting(CLIENT_CANDIDATES);
       COL_MATERIAL = byFirstExisting(MATERIAL_CANDIDATES);
-      COL_LIBRE   = byFirstExisting(LIBRE_CANDIDATES);
-      COL_ESTADO  = byFirstExisting(ESTADO_CANDIDATES);
+      COL_LIBRE    = byFirstExisting(LIBRE_CANDIDATES);
+      COL_ESTADO   = byFirstExisting(ESTADO_CANDIDATES);
 
-      // ✅ columnas valorización (tu tabla)
-      COL_RUBRO   = byFirstExisting(RUBRO_CANDIDATES);
-      COL_VALOR   = byFirstExisting(VALOR_CANDIDATES);
+      // valorización real
+      COL_RUBRO = byFirstExisting(RUBRO_CANDIDATES);
+      COL_VALOR = byFirstExisting(VALOR_CANDIDATES);
 
       if (!COL_CLIENT || !COL_MATERIAL || !COL_LIBRE || !COL_ESTADO) {
         showError(
           `No encuentro columnas necesarias.<br>
-          CLIENTE: ${COL_CLIENT || "NO"} · MATERIAL: ${COL_MATERIAL || "NO"} · LIBRE: ${COL_LIBRE || "NO"} · ESTADO: ${COL_ESTADO || "NO"}`
+           CLIENTE: ${COL_CLIENT || "NO"} · MATERIAL: ${COL_MATERIAL || "NO"} · LIBRE: ${COL_LIBRE || "NO"} · ESTADO: ${COL_ESTADO || "NO"}`
         );
         return;
       }
 
       safeSetText("clienteHint", `Columna cliente: ${COL_CLIENT}`);
 
+      // construir dataRows
       dataRows = [];
       for (let i = 1; i < m.length; i++) {
         const row = m[i];
@@ -456,7 +455,7 @@ window.addEventListener("DOMContentLoaded", () => {
         dataRows.push(obj);
       }
 
-      // Selector clientes
+      // poblar selector clientes
       const sel = document.getElementById("clienteSelect");
       if (sel) {
         const uniq = new Set();
@@ -478,4 +477,3 @@ window.addEventListener("DOMContentLoaded", () => {
       showError(err.message || String(err));
     });
 });
-
