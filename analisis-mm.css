@@ -76,7 +76,7 @@
 }
 
 .page-mm .mm-table-wrap-scroll{
-  max-height:320px;
+  max-height:520px;
   overflow:auto;
   border-radius:12px;
   border:1px solid rgba(0,0,0,.08);
