@@ -1,4 +1,4 @@
-/* ===== Análisis MM (tabla al lado del donut) ===== */
+/* ===== LADO A LADO + MISMO ALTO DE BLOQUE ===== */
 
 .page-mm .mm-two{
   display:grid;
@@ -6,10 +6,11 @@
   gap:14px;
 }
 
+/* Desktop: 2 columnas y estirar misma altura */
 @media (min-width: 1100px){
   .page-mm .mm-two{
     grid-template-columns: 1fr 1fr;
-    align-items:start;
+    align-items: stretch;     /* ✅ misma altura de bloque */
   }
 }
 
@@ -18,8 +19,13 @@
   border-radius:14px;
   padding:14px;
   box-shadow:0 1px 10px rgba(0,0,0,.06);
+
+  /* ✅ para que la tabla pueda “llenar” el alto */
+  display:flex;
+  flex-direction:column;
 }
 
+/* ===== Donut ===== */
 .page-mm .mm-donut-wrap{
   width:100%;
   display:flex;
@@ -32,6 +38,7 @@
   height:320px;
 }
 
+/* ===== Leyenda ===== */
 .page-mm .mm-legend{
   margin-top:12px;
   display:grid;
@@ -51,6 +58,7 @@
   padding:12px;
   border:1px solid rgba(0,0,0,.08);
   border-radius:12px;
+  background:#fff;
 }
 
 .page-mm .legend-dot{
@@ -75,8 +83,17 @@
   opacity:.85;
 }
 
+/* ===== Tabla Valorización: ocupa el alto del bloque ===== */
+.page-mm .mm-table-wrap{
+  display:flex;
+  flex-direction:column;
+  flex: 1;          /* ✅ se estira dentro del mm-block */
+  min-height: 0;    /* ✅ necesario para que el overflow funcione bien */
+}
+
 .page-mm .mm-table-wrap-scroll{
-  max-height:520px;
+  flex: 1;          /* ✅ ocupa todo el alto disponible */
+  min-height: 0;    /* ✅ importante */
   overflow:auto;
   border-radius:12px;
   border:1px solid rgba(0,0,0,.08);
@@ -86,6 +103,7 @@
   width:100%;
   border-collapse:collapse;
   font-size:12px;
+  background:#fff;
 }
 
 .page-mm .mm-table th,
@@ -99,12 +117,15 @@
   top:0;
   background:#f6f7fb;
   font-weight:900;
+  z-index:2;
 }
 
 .page-mm .mm-table .num{
   text-align:right;
+  white-space:nowrap;
 }
 
+/* total sticky */
 .page-mm .mm-table tfoot td{
   position:sticky;
   bottom:0;
@@ -112,3 +133,4 @@
   color:#fff;
   font-weight:900;
 }
+
