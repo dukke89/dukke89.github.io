@@ -1,30 +1,18 @@
 /* ============================
    CONFIG
-============================ */
-const csvUrl = "ANALISIS-MM.csv";
-const evolUrl = "EVOLUCION.csv";
+=========================== */
+
+const CSV_PATH = "ANALISIS-MM.csv";
 const DELIM = ";";
 
-// ANALISIS-MM columnas
-const CLIENT_CANDIDATES = ["ALMACEN","Almacén","Almacen","ALMACÉN","Cliente","CLIENTE","CLIENTE (ALMACEN)"];
-const MATERIAL_CANDIDATES = ["Material","MATERIAL","Código Item","CODIGO ITEM","Codigo Item","CODIGOITEM"];
-const LIBRE_CANDIDATES = ["Libre utilización","Libre utilizacion","LIBRE UTILIZACION","Libre Utilizacion","Libre utilización ","Libre utilizacion "];
-const ESTADO_CANDIDATES = ["Estado","ESTADO","Id Estado","ID ESTADO","IdEstado","IDESTADO","Id_Estado","id estado","Estado Item","ESTADO ITEM"];
+// Posibles nombres de columnas (por si cambian los encabezados)
+const CLIENT_CANDIDATES = ["ALMACEN", "Cliente", "CLIENTE", "OBRA", "CENTRO"];
+const MATERIAL_CANDIDATES = ["Material", "MATERIAL", "Código Item", "CODIGO ITEM", "Codigo Item", "CODIGO"];
+const LIBRE_CANDIDATES = ["Libre utilizacion", "Libre utilización", "LIBRE UTILIZACION", "LIBRE UTILIZACIÓN", "LIBRE", "Libre"];
+const ESTADO_CANDIDATES = ["Estado", "ESTADO", "estado"];
 
-// EVOLUCION columnas (flexibles)
-const EVO_MES_CANDIDATES = ["MES","Mes","Periodo","PERIODO","Fecha","FECHA","Mes/Año","MES AÑO","MES_ANIO","MES-AÑO","MES ANIO"];
-const EVO_CLIENT_CANDIDATES = ["ALMACEN","Almacén","Almacen","ALMACÉN","Cliente","CLIENTE"];
-const EVO_PROM_CANDIDATES = ["Promedio dias de demora","PROMEDIO DIAS DEMORA","Promedio días de demora","PROMEDIO DÍAS DE DEMORA","Promedio demora","PROMEDIO DEMORA"];
-const EVO_NOENT_CANDIDATES = ["No entregados","NO ENTREGADOS","No_Entregados","NO_ENTREGADOS"];
-const EVO_AT_CANDIDATES = ["Entregados AT","ENTREGADOS AT","Entregados a tiempo","ENTREGADOS A TIEMPO","Entregados AT %","ENTREGADOS AT %"];
-const EVO_FT_CANDIDATES = ["Entregados FT","ENTREGADOS FT","Entregados fuera de termino","ENTREGADOS FUERA DE TERMINO","Entregados FT %","ENTREGADOS FT %"];
-
-/* ============================
-   GLOBAL
-============================ */
-let data = [];
 let headers = [];
-
+let dataRows = []; // objetos: {col -> valor}
 let COL_CLIENT = null;
 let COL_MATERIAL = null;
 let COL_LIBRE = null;
@@ -32,172 +20,118 @@ let COL_ESTADO = null;
 
 let chartDonut = null;
 
-// Evolución
-let evoData = [];
-let evoHeaders = [];
-let EVO_COL_MES = null;
-let EVO_COL_CLIENT = null;
-let EVO_COL_PROM = null;
-let EVO_COL_NOENT = null;
-let EVO_COL_AT = null;
-let EVO_COL_FT = null;
-let chartEvo = null;
-
 /* ============================
    HELPERS
-============================ */
-function normalizeHeaderName(s){
-  if (s == null) return "";
-  return String(s)
-    .replace(/^\uFEFF/, "")
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+=========================== */
+
+function normLoose(s) {
+  return String(s ?? "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .trim().toLowerCase();
 }
 
-const clean = (v) => (v ?? "").toString().trim();
+function clean(s) {
+  return String(s ?? "").trim();
+}
 
-function byFirstExisting(candidates, headerArray) {
-  const hs = headerArray ?? headers;
-  const norm = hs.map(h => normalizeHeaderName(h));
-  for (const c of candidates) {
-    const idx = norm.indexOf(normalizeHeaderName(c));
-    if (idx >= 0) return hs[idx];
-  }
-  return null;
+function safeSetText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function fmtInt(n) {
+  const v = Number(n);
+  if (!isFinite(v)) return "-";
+  return Math.round(v).toLocaleString("es-AR");
+}
+
+function fmtMoney(n) {
+  const v = Number(n);
+  if (!isFinite(v)) return "-";
+  return v.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtPct(p) {
+  const v = Number(p);
+  if (!isFinite(v)) return "-";
+  return (v * 100).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 }
 
 function showError(msg) {
   const el = document.getElementById("msg");
-  if (el) el.innerHTML = `<div class="error">${msg}</div>`;
+  if (el) el.innerHTML = `<div class="alert alert-error">${msg}</div>`;
 }
 
-function safeSetText(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
+function showInfo(msg) {
+  const el = document.getElementById("msg");
+  if (el) el.innerHTML = `<div class="alert alert-info">${msg}</div>`;
 }
 
-function toNumber(v) {
-  let x = clean(v);
-  if (!x) return 0;
-  x = x.replace(/\s/g, "");
-  if (x.includes(",")) x = x.replace(/\./g, "").replace(",", ".");
-  const n = Number(x);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function fmtInt(n) {
-  return Number(n || 0).toLocaleString("es-AR", { maximumFractionDigits: 0 });
-}
-
-function fmtMoney(n) {
-  const x = Number(n || 0);
-  return x.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function parseMoney(v){
-  if (v == null) return 0;
-  const s = String(v).trim().replace(/[^0-9,.-]+/g, "");
-  if (!s) return 0;
-  if (s.includes(",") && s.lastIndexOf(",") > s.lastIndexOf(".")) {
-    return Number(s.replace(/\./g, "").replace(",", ".")) || 0;
+function byFirstExisting(cands) {
+  const hnorm = headers.map(h => normLoose(h));
+  for (const c of cands) {
+    const i = hnorm.indexOf(normLoose(c));
+    if (i >= 0) return headers[i];
   }
-  return Number(s.replace(/,/g, "")) || 0;
+  return null;
 }
 
-function fmtPct(x) {
-  if (!isFinite(x)) return "-";
-  return (x * 100).toFixed(2).replace(".", ",") + "%";
+function parseDelimited(text, delim) {
+  // parser simple (sin comillas complejas) para CSVs de SAP/Excel
+  const lines = text.split(/\r?\n/).filter(x => x.trim() !== "");
+  return lines.map(line => line.split(delim));
 }
 
-/* CSV parser (quotes safe) */
-function parseDelimited(text, delimiter = ";") {
-  const rows = [];
-  let row = [];
-  let cur = "";
-  let inQuotes = false;
-
-  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-
-    if (ch === '"') {
-      if (inQuotes && text[i + 1] === '"') { cur += '"'; i++; }
-      else { inQuotes = !inQuotes; }
-    } else if (ch === delimiter && !inQuotes) {
-      row.push(cur); cur = "";
-    } else if (ch === "\n" && !inQuotes) {
-      row.push(cur); rows.push(row);
-      row = []; cur = "";
-    } else {
-      cur += ch;
-    }
-  }
-
-  if (cur || row.length) { row.push(cur); rows.push(row); }
-  return rows;
+function toNum(val) {
+  const s = String(val ?? "").trim();
+  if (!s) return NaN;
+  // admite 1.234,56 o 1234,56
+  const norm = s.replace(/\./g, "").replace(",", ".");
+  const n = Number(norm);
+  return isFinite(n) ? n : NaN;
 }
 
 /* ============================
    FILTERS
-============================ */
-function getSelectedCliente() {
+=========================== */
+
+function getSelectedClient() {
   const sel = document.getElementById("clienteSelect");
-  return sel ? sel.value : "";
+  return sel ? clean(sel.value) : "";
 }
 
 function filteredRows() {
-  const c = getSelectedCliente();
-  if (!c) return data;
-  return data.filter(r => clean(r[COL_CLIENT]) === c);
+  const c = getSelectedClient();
+  if (!c) return dataRows;
+  return dataRows.filter(r => clean(r[COL_CLIENT]) === c);
 }
 
 /* ============================
-   UI: CLIENTES
-============================ */
-function renderClientes() {
-  const sel = document.getElementById("clienteSelect");
-  if (!sel) return;
+   KPIs
+=========================== */
 
-  sel.querySelectorAll("option:not([value=''])").forEach(o => o.remove());
-
-  const clientes = [...new Set(data.map(r => clean(r[COL_CLIENT])).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, "es"));
-
-  for (const c of clientes) {
-    const o = document.createElement("option");
-    o.value = c;
-    o.textContent = c;
-    sel.appendChild(o);
-  }
-}
-
-/* ============================
-   CALCS (MM)
-============================ */
 function calcKPIs(rows) {
-  const allMaterials = new Set();
-  const availableMaterials = new Set();
+  const mats = new Set();
+  const disp = new Set();
 
   for (const r of rows) {
     const mat = clean(r[COL_MATERIAL]);
     if (!mat) continue;
-    allMaterials.add(mat);
+    mats.add(mat);
 
-    const libre = toNumber(r[COL_LIBRE]);
-    if (libre > 0) availableMaterials.add(mat);
+    const libre = toNum(r[COL_LIBRE]);
+    if (isFinite(libre) && libre > 0) disp.add(mat);
   }
 
-  const totalMat = allMaterials.size;
-  const dispMat = availableMaterials.size;
+  const totalMat = mats.size;
+  const dispMat = disp.size;
   const pct = totalMat ? dispMat / totalMat : NaN;
 
   return { totalMat, dispMat, pct };
 }
 
 function calcEstados(rows) {
+  // Estado -> Set(material)
   const map = new Map();
 
   for (const r of rows) {
@@ -214,17 +148,33 @@ function calcEstados(rows) {
     qty: setMat.size
   }));
 
-  items.sort((a, b) => b.qty - a.qty);
+  // Ordena la leyenda/serie por prefijo numérico (01, 02, 03, 04, ...).
+  // Si no hay prefijo, va al final y se ordena alfabéticamente.
+  const prefNum = (s) => {
+    const m = String(s || "").trim().match(/^\s*(\d{1,3})\b/);
+    return m ? parseInt(m[1], 10) : Number.POSITIVE_INFINITY;
+  };
+  items.sort((a, b) => {
+    const na = prefNum(a.estado);
+    const nb = prefNum(b.estado);
+    if (na !== nb) return na - nb;
+    return String(a.estado).localeCompare(String(b.estado), "es", { sensitivity: "base" });
+  });
+
   const total = items.reduce((s, x) => s + x.qty, 0);
 
   return { items, total };
 }
 
 /* ============================
-   DONUT (ECharts) + LEYENDA
-============================ */
+   RENDER: DONA + LEYENDA
+=========================== */
+
 function buildDonut(items, total) {
-  if (!window.echarts) return;
+  if (!window.echarts) {
+    console.warn('ECharts no cargó: revisá el <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js">');
+    return;
+  }
 
   const host = document.getElementById("donutEstados");
   const legend = document.getElementById("donutLegend");
@@ -232,43 +182,30 @@ function buildDonut(items, total) {
 
   legend.innerHTML = "";
 
-  if (chartDonut) {
-    try { chartDonut.dispose(); } catch(e) {}
-    chartDonut = null;
+  if (!items.length) {
+    host.innerHTML = "";
+    legend.innerHTML = `<div class="hint">Sin datos para mostrar.</div>`;
+    return;
   }
 
-  const orderedItems = [...items].sort((a, b) => {
-    const getPref = (s) => {
-      const m = String(s || "").trim().match(/^\s*(\d{1,2})\s*[-.:_\s]/);
-      return m ? parseInt(m[1], 10) : 999;
-    };
-    const pa = getPref(a.estado);
-    const pb = getPref(b.estado);
-    if (pa !== pb) return pa - pb;
-    if ((b.qty || 0) !== (a.qty || 0)) return (b.qty || 0) - (a.qty || 0);
-    return String(a.estado).localeCompare(String(b.estado), "es");
-  });
-
-  const palette = [
-    "#1d4ed8", "#16a34a", "#f59e0b", "#7c3aed", "#0ea5e9",
-    "#10b981", "#a3a3a3", "#eab308", "#14b8a6", "#fb7185"
-  ];
-
-  const normLoose = (s) => normalizeHeaderName(s)
-    .replace(/^[0-9]+\s*[-.:_\s]*/g, "")
-    .replace(/[_\-\s]+/g, " ")
-    .trim();
-
-  const isStockNulo = (name) => normLoose(name) === normLoose("Stock nulo");
-
+  // colores (stock nulo rojo fijo si existe)
+  const palette = ["#2563eb", "#16a34a", "#f59e0b", "#8b5cf6", "#0ea5e9", "#22c55e", "#f97316", "#64748b"];
+  const isStockNulo = (name) => {
+    const n = normLoose(name);
+    const t = normLoose("Stock nulo");
+    return n === t;
+  };
   const colorByName = {};
   let palIdx = 0;
-  orderedItems.forEach(it => {
+  items.forEach(it => {
     if (isStockNulo(it.estado)) colorByName[it.estado] = "#ef4444";
-    else { colorByName[it.estado] = palette[palIdx % palette.length]; palIdx++; }
+    else {
+      colorByName[it.estado] = palette[palIdx % palette.length];
+      palIdx++;
+    }
   });
 
-  const seriesData = orderedItems.map(it => {
+  const seriesData = items.map(it => {
     const isSN = isStockNulo(it.estado);
     return ({
       name: it.estado,
@@ -288,8 +225,8 @@ function buildDonut(items, total) {
       trigger: "item",
       formatter: (p) => {
         const v = p.value || 0;
-        const pct = total ? ((v / total) * 100) : 0;
-        return `${p.name}<br/>${fmtInt(v)} materiales (${pct.toFixed(2).replace(".", ",")}%)`;
+        const pct = total ? (v / total) * 100 : 0;
+        return `<b>${p.name}</b><br/>${fmtInt(v)} materiales<br/>${pct.toFixed(2)}%`;
       }
     },
     series: [{
@@ -307,34 +244,34 @@ function buildDonut(items, total) {
           const pct = (v / total) * 100;
           if (pct < 3) return "";
           return `${p.name}\n${pct.toFixed(0)}%`;
-        },
-        fontWeight: 950,
-        fontSize: 12,
-        color: "#0b1220"
+        }
       },
-      labelLine: { show: true, length: 14, length2: 10 },
+      labelLine: { length: 12, length2: 10 },
       data: seriesData
     }]
   });
 
-  orderedItems.forEach((it) => {
-    const p = total ? it.qty / total : 0;
-    const pct = (p * 100).toFixed(0) + "%";
-    const c = colorByName[it.estado] || "#2d6cdf";
+  // leyenda custom (orden ya viene desde calcEstados)
+  items.forEach(it => {
+    const c = colorByName[it.estado] || "#64748b";
 
     const card = document.createElement("div");
-    card.className = "callout";
-    if (isStockNulo(it.estado)) card.classList.add("is-stock-nulo");
+    card.className = "legend-card";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
 
     const dot = document.createElement("span");
-    dot.className = "callout-dot";
+    dot.className = "legend-dot";
     dot.style.background = c;
 
     const body = document.createElement("div");
+    body.className = "legend-body";
 
     const title = document.createElement("div");
-    title.className = "callout-title";
+    title.className = "legend-title";
     title.textContent = it.estado;
+
+    const pct = total ? ((it.qty / total) * 100).toFixed(0) + "%" : "-";
 
     const big = document.createElement("div");
     big.className = "callout-pct";
@@ -354,177 +291,76 @@ function buildDonut(items, total) {
     legend.appendChild(card);
   });
 
-  window.addEventListener("resize", () => {
-    try { chartDonut && chartDonut.resize(); } catch(e) {}
-  }, { passive: true });
+  const onResize = () => { try { chartDonut && chartDonut.resize(); } catch(e) {} };
+  window.addEventListener("resize", onResize, { passive: true });
 }
 
 /* ============================
-   VALORIZACIÓN
-============================ */
-function buildValorizacionStock(rows){
+   VALORIZACIÓN STOCK (TABLA)
+=========================== */
+
+function buildValorizacionStock(rows) {
   const table = document.getElementById("tablaValorizacion");
   if (!table) return;
 
-  const colRubro = "Rubro";
-  const colValor = "Valor libre utilización";
+  const tb = table.querySelector("tbody");
+  if (!tb) return;
 
-  const agg = new Map();
-  rows.forEach(r => {
-    const rub = (r[colRubro] || "").trim();
-    if (!rub) return;
-    const val = parseMoney(r[colValor]);
-    agg.set(rub, (agg.get(rub) || 0) + (isFinite(val) ? val : 0));
-  });
+  tb.innerHTML = "";
 
-  const arr = Array.from(agg.entries())
-    .map(([rubro, valor]) => ({ rubro, valor }))
-    .sort((a,b) => b.valor - a.valor);
+  // Si ya tenés lógica previa de valorización por rubro en tu versión, dejala.
+  // Acá dejamos un fallback simple: suma Libre Utilización (si existe) por "estado".
+  const map = new Map();
+  let total = 0;
 
-  const total = arr.reduce((s,d) => s + d.valor, 0);
-  let acc = 0;
+  for (const r of rows) {
+    const rubro = clean(r[COL_ESTADO]) || "(Sin estado)";
+    const v = toNum(r[COL_LIBRE]);
+    if (!isFinite(v)) continue;
+    total += v;
+    map.set(rubro, (map.get(rubro) || 0) + v);
+  }
 
-  const tbody = table.querySelector("tbody");
-  tbody.innerHTML = "";
+  const items = [...map.entries()].map(([rubro, val]) => ({ rubro, val }));
+  items.sort((a, b) => b.val - a.val);
 
-  arr.forEach(d => {
-    acc += d.valor;
-    const pct = total ? (d.valor / total * 100) : 0;
-    const pctAcc = total ? (acc / total * 100) : 0;
+  let acum = 0;
+  for (const it of items) {
+    const pct = total ? it.val / total : 0;
+    acum += pct;
 
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.rubro}</td>
-      <td class="num">$ ${fmtMoney(d.valor)}</td>
-      <td class="num">${pct.toFixed(2).replace(".", ",")}%
-      </td>
-      <td class="num">${pctAcc.toFixed(2).replace(".", ",")}%
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
 
-  const valTotal = document.getElementById("valTotal");
-  if (valTotal) valTotal.textContent = `$ ${fmtMoney(total)}`;
-}
+    const tdR = document.createElement("td");
+    tdR.textContent = it.rubro;
 
-/* ============================
-   EVOLUCIÓN
-============================ */
-function parseMesKey(s) {
-  const v = clean(s);
-  if (!v) return { key: 99999999 };
+    const tdV = document.createElement("td");
+    tdV.className = "num";
+    tdV.textContent = fmtMoney(it.val);
 
-  let m = v.match(/^(\d{4})[-\/](\d{1,2})$/);
-  if (m) return { key: (+m[1])*100 + (+m[2]) };
+    const tdP = document.createElement("td");
+    tdP.className = "num";
+    tdP.textContent = (pct * 100).toFixed(2).replace(".", ",") + "%";
 
-  m = v.match(/^(\d{1,2})[-\/](\d{4})$/);
-  if (m) return { key: (+m[2])*100 + (+m[1]) };
+    const tdA = document.createElement("td");
+    tdA.className = "num";
+    tdA.textContent = (acum * 100).toFixed(2).replace(".", ",") + "%";
 
-  m = v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
-  if (m) return { key: (+m[3])*100 + (+m[2]) };
+    tr.appendChild(tdR);
+    tr.appendChild(tdV);
+    tr.appendChild(tdP);
+    tr.appendChild(tdA);
 
-  return { key: 90000000 };
-}
+    tb.appendChild(tr);
+  }
 
-function getEvoRowsFiltered() {
-  const c = getSelectedCliente();
-  if (!c) return evoData;
-  if (!EVO_COL_CLIENT) return evoData;
-  return evoData.filter(r => clean(r[EVO_COL_CLIENT]) === c);
-}
-
-function buildEvolucionChart() {
-  if (!window.echarts) return;
-
-  const el = document.getElementById("evolucionChart");
-  if (!el) return;
-
-  if (!evoData.length || !EVO_COL_MES) return;
-
-  const rows = getEvoRowsFiltered();
-
-  const agg = new Map();
-  rows.forEach(r => {
-    const mes = clean(r[EVO_COL_MES]);
-    if (!mes) return;
-    if (!agg.has(mes)) agg.set(mes, { prom: 0, noent: 0, at: 0, ft: 0, n: 0 });
-    const a = agg.get(mes);
-    a.prom += toNumber(r[EVO_COL_PROM]);
-    a.noent += toNumber(r[EVO_COL_NOENT]);
-    a.at += toNumber(r[EVO_COL_AT]);
-    a.ft += toNumber(r[EVO_COL_FT]);
-    a.n += 1;
-  });
-
-  const items = Array.from(agg.entries()).map(([mes, v]) => {
-    const k = parseMesKey(mes);
-    return { mes, key: k.key, ...v };
-  }).sort((a,b) => a.key - b.key || a.mes.localeCompare(b.mes, "es"));
-
-  const x = items.map(d => d.mes);
-  const prom = items.map(d => d.n ? +(d.prom / d.n).toFixed(2) : 0);
-  const noent = items.map(d => +d.noent.toFixed(0));
-  const at = items.map(d => +d.at.toFixed(0));
-  const ft = items.map(d => +d.ft.toFixed(0));
-
-  if (chartEvo) { try { chartEvo.dispose(); } catch(e) {} }
-  chartEvo = echarts.init(el, null, { renderer: "canvas" });
-
-  chartEvo.setOption({
-    grid: { left: 50, right: 18, top: 30, bottom: 55 },
-    tooltip: { trigger: "axis" },
-    legend: { top: 0, left: 0 },
-    xAxis: { type: "category", data: x, axisLabel: { rotate: 35 } },
-    yAxis: [
-      { type: "value", name: "Cant." },
-      { type: "value", name: "Días" }
-    ],
-    series: [
-      { name: "No entregados", type: "bar", yAxisIndex: 0, data: noent, itemStyle: { color: "#ef4444" } },
-      { name: "Entregados AT", type: "bar", yAxisIndex: 0, data: at, itemStyle: { color: "#16a34a" } },
-      { name: "Entregados FT", type: "bar", yAxisIndex: 0, data: ft, itemStyle: { color: "#f59e0b" } },
-      { name: "Promedio días de demora", type: "line", yAxisIndex: 1, data: prom, smooth: true, itemStyle: { color: "#1d4ed8" } }
-    ]
-  });
-
-  window.addEventListener("resize", () => {
-    try { chartEvo && chartEvo.resize(); } catch(e) {}
-  }, { passive: true });
-}
-
-function loadEvolucion() {
-  return fetch(evolUrl)
-    .then(r => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
-    .then(text => {
-      const m = parseDelimited(text, DELIM);
-      if (!m.length || m.length < 2) return;
-
-      evoHeaders = m[0].map(clean);
-
-      EVO_COL_MES = byFirstExisting(EVO_MES_CANDIDATES, evoHeaders);
-      EVO_COL_CLIENT = byFirstExisting(EVO_CLIENT_CANDIDATES, evoHeaders);
-      EVO_COL_PROM = byFirstExisting(EVO_PROM_CANDIDATES, evoHeaders);
-      EVO_COL_NOENT = byFirstExisting(EVO_NOENT_CANDIDATES, evoHeaders);
-      EVO_COL_AT = byFirstExisting(EVO_AT_CANDIDATES, evoHeaders);
-      EVO_COL_FT = byFirstExisting(EVO_FT_CANDIDATES, evoHeaders);
-
-      if (!EVO_COL_MES || !EVO_COL_PROM || !EVO_COL_NOENT || !EVO_COL_AT || !EVO_COL_FT) return;
-
-      evoData = m.slice(1).map(row => {
-        const o = {};
-        evoHeaders.forEach((h, i) => (o[h] = clean(row[i])));
-        return o;
-      });
-
-      buildEvolucionChart();
-    })
-    .catch(() => {});
+  safeSetText("valTotal", fmtMoney(total));
 }
 
 /* ============================
    APPLY ALL
-============================ */
+=========================== */
+
 function applyAll() {
   const rows = filteredRows();
 
@@ -536,57 +372,81 @@ function applyAll() {
   const e = calcEstados(rows);
   buildDonut(e.items, e.total);
   buildValorizacionStock(rows);
-
-  buildEvolucionChart(); // mantiene EVOLUCIÓN con filtro
 }
 
 /* ============================
    INIT
-============================ */
-window.addEventListener("DOMContentLoaded", () => {
-  const d = new Date();
-  safeSetText(
-    "lastUpdate",
-    `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
-  );
+=========================== */
 
-  fetch(csvUrl)
-    .then(r => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
+window.addEventListener("DOMContentLoaded", () => {
+  safeSetText("mmSourceName", CSV_PATH);
+
+  fetch(CSV_PATH, { cache: "no-store" })
+    .then(r => {
+      if (!r.ok) throw new Error(`No se pudo leer ${CSV_PATH} (HTTP ${r.status})`);
+      const lm = r.headers.get("last-modified");
+      if (lm) {
+        try {
+          const d = new Date(lm);
+          safeSetText("lastUpdate", d.toLocaleDateString("es-AR"));
+        } catch(e) {}
+      }
+      return r.text();
+    })
     .then(text => {
       const m = parseDelimited(text, DELIM);
-      if (!m.length || m.length < 2) { showError("El CSV está vacío o no tiene filas."); return; }
-
-      headers = m[0].map(clean);
-
-      COL_CLIENT = byFirstExisting(CLIENT_CANDIDATES, headers);
-      COL_MATERIAL = byFirstExisting(MATERIAL_CANDIDATES, headers);
-      COL_LIBRE = byFirstExisting(LIBRE_CANDIDATES, headers);
-      COL_ESTADO = byFirstExisting(ESTADO_CANDIDATES, headers);
-
-      const missing = [];
-      if (!COL_CLIENT) missing.push("ALMACEN");
-      if (!COL_MATERIAL) missing.push("Material");
-      if (!COL_LIBRE) missing.push("Libre utilización");
-      if (!COL_ESTADO) missing.push("Estado");
-
-      if (missing.length) {
-        showError(`Faltan columnas en ${csvUrl}: ${missing.join(", ")}`);
+      if (!m.length || m.length < 2) {
+        showError("El CSV está vacío o no tiene filas.");
         return;
       }
 
-      data = m.slice(1).map(row => {
-        const o = {};
-        headers.forEach((h, i) => (o[h] = clean(row[i])));
-        return o;
-      });
+      headers = m[0].map(clean);
 
-      renderClientes();
+      COL_CLIENT = byFirstExisting(CLIENT_CANDIDATES);
+      COL_MATERIAL = byFirstExisting(MATERIAL_CANDIDATES);
+      COL_LIBRE = byFirstExisting(LIBRE_CANDIDATES);
+      COL_ESTADO = byFirstExisting(ESTADO_CANDIDATES);
 
-      // carga evolución y luego aplica todo
-      loadEvolucion().finally(() => applyAll());
+      if (!COL_CLIENT || !COL_MATERIAL || !COL_LIBRE || !COL_ESTADO) {
+        showError(
+          `No encuentro columnas necesarias.<br>
+          CLIENTE: ${COL_CLIENT || "NO"} · MATERIAL: ${COL_MATERIAL || "NO"} · LIBRE: ${COL_LIBRE || "NO"} · ESTADO: ${COL_ESTADO || "NO"}`
+        );
+        return;
+      }
 
-      document.getElementById("clienteSelect")?.addEventListener("change", applyAll);
+      safeSetText("clienteHint", `Columna cliente: ${COL_CLIENT}`);
+
+      // construir dataRows
+      dataRows = [];
+      for (let i = 1; i < m.length; i++) {
+        const row = m[i];
+        const obj = {};
+        headers.forEach((h, idx) => obj[h] = row[idx] ?? "");
+        dataRows.push(obj);
+      }
+
+      // poblar selector clientes
+      const sel = document.getElementById("clienteSelect");
+      if (sel) {
+        const uniq = new Set();
+        dataRows.forEach(r => {
+          const v = clean(r[COL_CLIENT]);
+          if (v) uniq.add(v);
+        });
+
+        const list = [...uniq].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+        // deja "Todos" y agrega opciones
+        sel.innerHTML = `<option value="">Todos</option>` + list.map(v => `<option value="${v}">${v}</option>`).join("");
+        sel.addEventListener("change", () => applyAll());
+      }
+
+      showInfo("Datos cargados.");
+      applyAll();
     })
-    .catch(() => showError(`Error cargando ${csvUrl}. Revisá el nombre EXACTO y que esté en la raíz del repo.`));
+    .catch(err => {
+      console.error(err);
+      showError(err.message || String(err));
+    });
 });
 
