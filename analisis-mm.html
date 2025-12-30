@@ -6,7 +6,7 @@
   <title>ABASTECIMIENTO</title>
 
   <link rel="stylesheet" href="base.css" />
-  <link rel="stylesheet" href="analisis-mm.css?v=2025123001" />
+  <link rel="stylesheet" href="analisis-mm.css?v=2025123002" />
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 
@@ -34,10 +34,9 @@
   <main class="container">
     <div id="msg"></div>
 
-    <!-- FILTRO -->
+    <!-- FILTRO (SIN BOTONES) -->
     <section class="panel">
       <div class="panel-body mm-filter-row">
-
         <div class="filter">
           <label>CLIENTE (ALMACEN)</label>
           <select id="clienteSelect">
@@ -46,21 +45,10 @@
           <div id="clienteHint" class="hint">Columna cliente: -</div>
         </div>
 
-        <!-- (si querés mantener los botones, dejalos; si no, borrá este bloque) -->
-        <div class="filter mm-actions">
-          <label>&nbsp;</label>
-          <div class="mm-btn-row">
-            <button id="btnDLStockNulo" class="btn btn-primary" type="button">⬇ Stock nulo</button>
-            <button id="btnDLMenorPP" class="btn btn-primary" type="button">⬇ Menor a PP</button>
-            <button id="btnDLMayorStockMax" class="btn btn-primary" type="button">⬇ Mayor a Stock Máx</button>
-          </div>
-          <div class="hint">Descarga CSV según indicador (respeta CLIENTE)</div>
-        </div>
-
         <div class="filter mm-source">
           <div class="hint"><b>Fuente:</b> <span id="mmSourceName">ANALISIS-MM.csv</span> (delimitador “;”)</div>
+          <div class="hint"><b>Evolución:</b> <span>EVOLUCION.csv</span></div>
         </div>
-
       </div>
     </section>
 
@@ -102,9 +90,7 @@
     <section class="panel">
       <div class="panel-body">
         <div class="mm-card">
-
           <div class="mm-two">
-            <!-- Bloque 1 -->
             <div class="mm-block">
               <div class="mm-block-title">ESTADOS</div>
               <div class="mm-donut-wrap">
@@ -113,7 +99,6 @@
               <div class="mm-legend" id="donutLegend" aria-label="Leyenda del gráfico"></div>
             </div>
 
-            <!-- Bloque 2 -->
             <div class="mm-block">
               <div class="mm-block-title">VALORIZACIÓN DE STOCK</div>
               <div class="mm-table-wrap mm-table-wrap-scroll">
@@ -141,39 +126,25 @@
           </div>
 
           <div class="footnote" style="margin-top:10px">
-            Fuente: <b>ANALISIS-MM.csv</b> · Filtro: <b>ALMACEN</b> · Cálculo: materiales distintos (Material) y disponibles (Libre utilización &gt; 0).
+            Fuente: <b>ANALISIS-MM.csv</b> · Filtro: <b>ALMACEN</b>.
           </div>
-
         </div>
       </div>
     </section>
 
-    <!-- ✅ EVOLUCIÓN (afuera del footer, con DOM correcto) -->
+    <!-- ✅ EVOLUCIÓN (SE MANTIENE) -->
     <section class="panel">
       <div class="panel-title">EVOLUCIÓN POR MES</div>
       <div class="panel-body">
-        <div class="mm-card">
-          <div class="mm-card-title">Cantidad por mes y % disponibilidad</div>
-
-          <div style="margin-bottom:10px">
-            <label><b>OBRA:</b></label>
-            <select id="obraSelect">
-              <option value="">Todas</option>
-            </select>
-          </div>
-
-          <div id="chartEvolucion" style="width:100%;height:420px;"></div>
-        </div>
+        <div id="evolucionChart" style="width:100%; height:360px;"></div>
       </div>
     </section>
 
     <footer class="footnote">
-      Fuente: <b>ANALISIS-MM.csv</b> y <b>EVOLUCION.csv</b> (delimitador “;”).
+      Fuente: <b>ANALISIS-MM.csv</b> y <b>EVOLUCION.csv</b>.
     </footer>
   </main>
 
-  <!-- orden correcto: primero analisis-mm.js, después evolucion.js -->
-  <script src="analisis-mm.js?v=2025123001"></script>
-  <script src="evolucion.js?v=2025123001"></script>
+  <script src="analisis-mm.js?v=2025123002"></script>
 </body>
 </html>
