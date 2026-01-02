@@ -1,12 +1,13 @@
-/* ===== Cumplimiento (index.html) ===== */
+/* ===== Cumplimiento (cumplimiento.css) ===== */
 
-@media (min-width: 1100px){
-  /* Filtros (5 columnas): Cliente, Clasificación 2, GC OC, Mes, Botón */
-  .page-cumplimiento .filters.filters-4{
-    grid-template-columns: 1.3fr 1.1fr 1.0fr 0.9fr 1.0fr;
+@media (min-width: 900px){
+  .page-cumplimiento .filters.filters-cumplimiento{
+    grid-template-columns: repeat(3, 1fr);
   }
+}
 
-  /* KPIs 4 columnas cuando uses .kpi-grid-4 */
+/* KPI grid 4 columnas */
+@media (min-width: 1100px){
   .page-cumplimiento .kpi-grid.kpi-grid-4{
     grid-template-columns: repeat(4, 1fr);
   }
@@ -36,3 +37,36 @@
 .page-cumplimiento .filters .field select{ min-height: 38px; }
 .page-cumplimiento .kpi{ min-height: 86px; }
 .page-cumplimiento #msg{ margin: 10px 0 0; }
+
+/* ===== KPI: fondos suaves por color (solo Cumplimiento) ===== */
+.page-cumplimiento .kpi{
+  background: #fff; /* base */
+}
+
+/* Fondo suave + borde acorde al color */
+.page-cumplimiento .kpi.kpi-blue{
+  background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(37,99,235,.03));
+  border-color: rgba(37,99,235,.25);
+}
+.page-cumplimiento .kpi.kpi-green{
+  background: linear-gradient(135deg, rgba(22,163,74,.12), rgba(22,163,74,.03));
+  border-color: rgba(22,163,74,.25);
+}
+.page-cumplimiento .kpi.kpi-amber{
+  background: linear-gradient(135deg, rgba(245,158,11,.14), rgba(245,158,11,.03));
+  border-color: rgba(245,158,11,.28);
+}
+.page-cumplimiento .kpi.kpi-red{
+  background: linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.03));
+  border-color: rgba(239,68,68,.25);
+}
+.page-cumplimiento .kpi.kpi-slate{
+  background: linear-gradient(135deg, rgba(100,116,139,.12), rgba(100,116,139,.03));
+  border-color: rgba(100,116,139,.25);
+}
+
+/* Hover un poco más “vivo” */
+.page-cumplimiento .kpi:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
