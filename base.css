@@ -872,3 +872,34 @@ button.primary {
   color: #6b7280;
 }
 
+/* ===== PESTAÑAS A LA IZQUIERDA ===== */
+.tabs {
+  justify-content: flex-start !important;
+  padding-left: 24px;
+}
+
+/* ===== ETIQUETAS NEUTRAS ===== */
+.filters label,
+.filters .label,
+.filter-group label {
+  color: #374151 !important; /* gris neutro */
+  font-weight: 500;
+}
+/* ===== GRUPOS DE FILTROS ===== */
+.filter-group,
+.filters > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* MISMO margen para todos */
+}
+/* ===== BOTÓN DESCARGA ===== */
+.filters button,
+.filters .btn {
+  margin-top: 22px; /* mismo nivel visual que selects */
+}
+
+.filters label span,
+.filters small {
+  color: #6b7280;
+}
+
