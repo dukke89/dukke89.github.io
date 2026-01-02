@@ -1,0 +1,50 @@
+/* BASE CSS – KPI DASHBOARD */
+
+/* RESET */
+*{box-sizing:border-box}
+html,body{
+ margin:0;padding:0;
+ font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+ background:#f4f6f8;color:#1f2937;
+}
+
+/* HEADER */
+.header{
+ background:linear-gradient(135deg,#0f766e,#2ca6a4 45%,#2563eb);
+ padding:16px 28px;color:#fff
+}
+.header-title{font-size:26px;font-weight:600}
+.header-subtitle{font-size:15px;font-weight:400}
+
+/* TABS */
+.tabs{display:flex;gap:14px;justify-content:flex-start;padding:10px 24px}
+.tab{
+ min-width:150px;height:40px;border-radius:999px;
+ border:1px solid #d1d5db;background:#fff;
+ font-weight:600;font-size:13px
+}
+.tab.active{background:#fdebd3;border-color:#f59e0b}
+
+/* KPI */
+.kpi{
+ background:#fff!important;border-radius:16px;
+ padding:16px 16px 16px 26px;
+ box-shadow:0 8px 22px rgba(0,0,0,.06);
+ position:relative
+}
+.kpi::before{
+ content:"";position:absolute;left:0;top:0;bottom:0;width:10px;
+ border-radius:16px 0 0 16px
+}
+.kpi.green::before{background:#16a34a}
+.kpi.orange::before{background:#f59e0b}
+.kpi.red::before{background:#ef4444}
+.kpi.gray::before{background:#64748b}
+
+.kpi-title{font-size:12px;font-weight:600}
+.kpi-value{font-size:28px;font-weight:600}
+.kpi-sub{font-size:12px;color:#6b7280}
+
+/* VARIACION */
+.kpi .up{color:#16a34a;font-weight:600}
+.kpi .down{color:#dc2626;font-weight:600}
