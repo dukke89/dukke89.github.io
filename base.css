@@ -614,3 +614,261 @@ tbody tr:hover td{
 
 /* Evitar fondos "tintados" en paneles de gráficos */
 .panel .chart-card{ background: transparent !important; }
+
+/* ==============================
+   RESET / BASE
+============================== */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 400;
+  background: #f4f6f8;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==============================
+   HEADER
+============================== */
+.header {
+  background: linear-gradient(
+    135deg,
+    #0f766e 0%,
+    #2ca6a4 45%,
+    #2563eb 100%
+  );
+  padding: 20px 28px;
+  color: #ffffff;
+}
+
+.header-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 15px;
+  font-weight: 400 !important;
+  margin-top: 4px;
+  opacity: 0.95;
+  letter-spacing: 0.2px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Evita diferencia visual entre páginas */
+.page-mm .header-subtitle,
+.page-cumplimiento .header-subtitle,
+.page-demoras .header-subtitle {
+  font-weight: 400 !important;
+}
+
+/* ==============================
+   TABS / PESTAÑAS
+============================== */
+.tabs {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.tab {
+  min-width: 160px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab.active {
+  background: #fdebd3;
+  border-color: #f59e0b;
+}
+
+.tab:hover {
+  background: #f3f4f6;
+}
+
+/* ==============================
+   FILTROS
+============================== */
+.filters {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.filters label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filters select,
+.filters input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+/* ==============================
+   SECCIONES
+============================== */
+.section {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* ==============================
+   KPI CARDS
+============================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.kpi-card {
+  position: relative;
+  background: #ffffff; /* SIN COLOR */
+  border-radius: 16px;
+  padding: 18px 18px 18px 26px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+}
+
+/* Barra lateral – doble de ancho */
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px; /* DOBLE */
+  border-radius: 16px 0 0 16px;
+}
+
+/* Colores de estado */
+.kpi-card.success::before { background: #16a34a; }
+.kpi-card.warning::before { background: #f59e0b; }
+.kpi-card.danger::before  { background: #ef4444; }
+.kpi-card.info::before    { background: #2563eb; }
+
+.kpi-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #374151;
+}
+
+.kpi-value {
+  font-size: 34px;
+  font-weight: 600;
+  margin: 6px 0;
+  color: #111827;
+}
+
+.kpi-sub {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Evita negrita extra en Análisis MM */
+.page-mm .kpi-title,
+.page-mm .kpi-value,
+.page-mm .kpi-sub {
+  font-weight: 400;
+}
+
+/* ==============================
+   GRÁFICOS
+============================== */
+.chart-container {
+  background: transparent !important; /* SIN FONDO */
+  box-shadow: none !important;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Elimina subtítulos explicativos dentro del bloque */
+.chart-subtitle {
+  display: none !important;
+}
+
+/* ==============================
+   TABLAS
+============================== */
+.table-container {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* ==============================
+   BOTONES
+============================== */
+button {
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* ==============================
+   FOOTER / FUENTE
+============================== */
+.footer-note {
+  font-size: 12px;
+  color: #6b7280;
+}
+
