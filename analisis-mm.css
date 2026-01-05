@@ -505,3 +505,17 @@
   font-size: 12px;
   opacity: .85;
 }
+
+/* ===== MULTISELECT IGUAL CUMPLIMIENTO ===== */
+.page-mm select.multi-select{
+  width: 260px;
+  min-height: 140px;
+  padding: 6px;
+}
+
+/* ===== RUBRO ALERTA ===== */
+.table td.rubro-alert{
+  color: #ef4444 !important;
+  font-weight: 700;
+}
+
