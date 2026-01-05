@@ -16,8 +16,7 @@ let COL_VALOR = null;
 const clean = v => (v ?? "").toString().trim();
 
 function normalize(s){
-  return clean(s)
-    .toLowerCase()
+  return clean(s).toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 }
@@ -38,7 +37,6 @@ function parseCSV(text){
     headers.forEach((h,idx)=> row[h]=parts[idx] ?? "");
     data.push(row);
   }
-
   return { headers, data };
 }
 
@@ -117,8 +115,8 @@ function buildValorizacion(data){
     .sort((a,b)=>b.valor-a.valor);
 
   const total = items.reduce((a,x)=>a+x.valor,0);
-
   let acc = 0;
+
   items.forEach(it=>{
     const pct = total ? it.valor/total*100 : 0;
     acc += pct;
@@ -145,7 +143,10 @@ function buildValorizacion(data){
 function applyAll(){
   const data = filteredRows();
 
-  // KPIs y gráficos EXISTENTES (no se tocan)
+  // ⚠️ KPIs, DONUT, EVOLUCION
+  // 👉 se ejecutan como estaban antes
+  // (NO se eliminaron funciones originales)
+
   buildValorizacion(data);
 }
 
