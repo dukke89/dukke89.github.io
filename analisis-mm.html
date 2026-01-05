@@ -5,19 +5,17 @@
   <title>ABASTECIMIENTO – Análisis MM</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="base.css?v=20260105">
-  <link rel="stylesheet" href="analisis-mm.css?v=20260105">
+  <link rel="stylesheet" href="base.css?v=20260106">
+  <link rel="stylesheet" href="analisis-mm.css?v=20260106">
 </head>
 
-<body class="page-mm">
+<body class="page-analisis-mm">
 
 <header class="header">
-  <div class="title">
-    <h1>ABASTECIMIENTO</h1>
-    <span>Análisis MM</span>
-  </div>
+  <h1>ABASTECIMIENTO</h1>
+  <h2>Análisis MM</h2>
 
-  <nav class="nav">
+  <nav class="tabs">
     <a href="analisis-mm.html" class="active">ANÁLISIS MM</a>
     <a href="cumplimiento.html">CUMPLIMIENTO</a>
     <a href="demoras.html">DEMORAS</a>
@@ -28,17 +26,17 @@
 
   <!-- ================= FILTROS ================= -->
   <section class="panel filtros">
-    <h3>CLIENTE (ALMACEN)</h3>
+    <h3>CLIENTE (ALMACÉN)</h3>
 
-    <!-- MISMO SELECT QUE CUMPLIMIENTO / DEMORAS -->
+    <!-- 🔽 MULTISELECT IGUAL CUMPLIMIENTO / DEMORAS -->
     <select id="clienteSelect" multiple size="6" class="multi-select"></select>
 
-    <div class="help">
+    <div class="filter-help">
       Columna cliente: <b>Almacén</b><br>
       Descarga CSV según columna indicador (respeta CLIENTE)
     </div>
 
-    <button id="btnDescargaIndicador" class="btn">
+    <button id="btnIndicador" class="btn">
       ⬇ STO NULO / MENOR PP
     </button>
   </section>
@@ -46,25 +44,25 @@
   <!-- ================= KPIs ================= -->
   <section class="panel kpis">
     <div class="kpi">
-      <span class="kpi-title">CANT MATERIALES</span>
-      <span id="kpiMateriales" class="kpi-value">-</span>
-      <span class="kpi-sub">Materiales distintos</span>
+      <span class="label">CANT MATERIALES</span>
+      <span id="kpiMateriales" class="value">-</span>
+      <span class="sub">Materiales distintos</span>
     </div>
 
     <div class="kpi">
-      <span class="kpi-title">CANT DISPONIBLE</span>
-      <span id="kpiDisponible" class="kpi-value">-</span>
-      <span class="kpi-sub">Libre utilización &gt; 0</span>
+      <span class="label">CANT DISPONIBLE</span>
+      <span id="kpiDisponible" class="value">-</span>
+      <span class="sub">Libre utilización &gt; 0</span>
     </div>
 
     <div class="kpi">
-      <span class="kpi-title">DISPONIBLE</span>
-      <span id="kpiPctDisponible" class="kpi-value">-</span>
-      <span class="kpi-sub">% Disponible / Materiales</span>
+      <span class="label">DISPONIBLE</span>
+      <span id="kpiPctDisponible" class="value">-</span>
+      <span class="sub">% Disponible / Materiales</span>
     </div>
   </section>
 
-  <!-- ================= GRAFICOS + TABLAS ================= -->
+  <!-- ================= GRAFICOS ================= -->
   <section class="panel-grid">
 
     <section class="panel">
@@ -75,6 +73,7 @@
 
     <section class="panel">
       <h3>VALORIZACIÓN DE STOCK</h3>
+
       <div class="table-wrapper">
         <table id="tablaValorizacion" class="table">
           <thead>
@@ -102,7 +101,7 @@
 
 </main>
 
-<script src="analisis-mm.js?v=20260105"></script>
+<script src="analisis-mm.js?v=20260106"></script>
 </body>
 </html>
 
