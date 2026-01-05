@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO</title>
+
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="analisis-mm.css?v=20251229202542" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+
+<body class="page-mm">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div class="subtitle">Análisis MM</div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="update-box">
+        <div class="update-label">Última actualización</div>
+        <div id="lastUpdate" class="update-date">--/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab active" href="analisis-mm.html">ANÁLISIS MM</a>
+    <a class="tab" href="index.html">CUMPLIMIENTO</a>
+    <a class="tab" href="demoras.html">DEMORAS</a>
+  </nav>
+
+  <main class="container">
+    <div id="msg"></div>
+
+    <!-- FILTRO -->
+    <section class="panel">
+      <div class="panel-body mm-filter-row">
+        <div class="filter">
+          <label>CLIENTE (ALMACEN)</label>
+<div class="mm-client-row">
+  <div class="ms" id="clienteMS">
+    <button type="button" class="ms-btn" id="clienteMSBtn">Todos</button>
+    <div class="ms-panel" id="clienteMSPanel">
+      <label class="ms-row">
+        <input type="checkbox" value="" data-all="1" checked>
+        <span>Todos</span>
+      </label>
+      <div class="ms-sep"></div>
+      <div id="clienteMSOptions"></div>
+    </div>
+  </div>
+
+  <button id="btnDLStoNuloPP" class="btn btn-outline" type="button" title="Descargar STO NULO - STO MENOR PP.csv">
+    ⬇ STO NULO / MENOR PP
+  </button>
+</div>
+
+<div id="clienteHint" class="hint">Columna cliente: -</div>
+<div class="hint">Descarga CSV según columna indicador (respeta CLIENTE)</div>
+        </div>
+</div>
+
+        
+
+        <div class="filter mm-source">
+          <div class="hint"><b>Fuente:</b> <span id="mmSourceName">ANALISIS-MM.csv</span> (delimitador “;”)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="panel">
+      <div class="panel-title">DISPONIBILIDAD</div>
+
+      <div class="panel-body kpi-grid kpi-grid-3">
+        <div class="kpi kpi-blue">
+          <div class="kpi-head">
+            <div class="kpi-title">CANT MATERIALES</div>
+            <div class="kpi-icon">📦</div>
+          </div>
+          <div id="kpiMat" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Materiales distintos</div>
+        </div>
+
+        <div class="kpi kpi-green">
+          <div class="kpi-head">
+            <div class="kpi-title">CANT DISPONIBLE</div>
+            <div class="kpi-icon">✅</div>
+          </div>
+          <div id="kpiDisp" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Materiales con Libre utilización &gt; 0</div>
+        </div>
+
+        <div class="kpi kpi-amber">
+          <div class="kpi-head">
+            <div class="kpi-title">DISPONIBLE</div>
+            <div class="kpi-icon">📈</div>
+          </div>
+          <div id="kpiPct" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Disponible / Materiales</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTADOS -->
+    <section class="panel">
+      <div class="panel-body">
+        <div class="mm-card">
+<div class="mm-two">
+    <!-- Bloque 1: Gráfico circular + leyenda -->
+    <div class="mm-block">
+      <div class="mm-block-title">ESTADOS</div>
+      <div class="mm-donut-wrap">
+        <div id="donutEstados" class="mm-donut" aria-label="Gráfico circular"></div>
+      </div>
+      <div class="mm-legend" id="donutLegend" aria-label="Leyenda del gráfico"></div>
+    </div>
+
+    <!-- Bloque 2: Tabla valorización -->
+    <div class="mm-block">
+      <div class="mm-block-title">VALORIZACIÓN DE STOCK</div>
+      <div class="mm-table-wrap mm-table-wrap-scroll">
+        <table id="tablaValorizacion" class="mm-table">
+          <thead>
+            <tr>
+              <th>RUBRO</th>
+              <th class="num">Valor libre utilización</th>
+              <th class="num">% del total</th>
+              <th class="num">% acumulado</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td><b>Total general</b></td>
+              <td id="valTotal" class="num"></td>
+              <td class="num">100,00%</td>
+              <td class="num">100,00%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+    <footer class="footnote">
+      Fuente: <b>ANALISIS-MM.csv</b> · Filtro: <b>ALMACEN</b> · Cálculo: materiales distintos (Material) y disponibles (Libre utilización &gt; 0).
+    
+    <!-- EVOLUCIÓN -->
+    <section class="panel">
+      <div class="panel-title">EVOLUCIÓN POR MES</div>
+      <div class="panel-body">
+        <div class="mm-card">
+          <div class="mm-card-title">Cantidad por mes y % disponibilidad</div>
+          <div style="margin-bottom:10px">
+            <label><b>OBRA:</b></label>
+            <select id="obraSelect">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div id="chartEvolucion" style="width:100%;height:420px;"></div>
+        </div>
+      </div>
+    </section>
+
+    </footer>
+  </main>
+
+  <script src="analisis-mm.js?v=20251229202542"></script>
+  <script src="evolucion.js"></script>
+</body>
+</html>
+
