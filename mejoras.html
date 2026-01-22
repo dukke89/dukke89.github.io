@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ABASTECIMIENTO - Análisis Avanzado</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="mejoras.css" />
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+
+<body class="page-mejoras">
+    <!-- LOADER -->
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Cargando datos...</div>
+    </div>
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="title">ABASTECIMIENTO</div>
+            <div class="subtitle">Análisis Avanzado y Mejoras</div>
+        </div>
+
+        <div class="topbar-right">
+            <div class="update-box">
+                <div class="update-label">Última actualización</div>
+                <div id="lastUpdate" class="update-date">--/--/----</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <a class="tab" href="analisis-mm.html">ANÁLISIS MM</a>
+        <a class="tab" href="index.html">CUMPLIMIENTO</a>
+        <a class="tab" href="demoras.html">DEMORAS</a>
+        <a class="tab" href="resumen.html">RESUMEN</a>
+        <a class="tab active" href="mejoras.html">MEJORAS</a>
+    </nav>
+
+    <main class="container">
+        <div id="msg"></div>
+
+        <!-- FILTROS -->
+        <section class="panel">
+            <div class="panel-body filters filters-2">
+                <div class="filter">
+                    <label>CLIENTE (ALMACÉN)</label>
+                    <select id="clienteSelect" class="multi-select" multiple size="6"></select>
+                    <div id="clienteHint" class="hint">Columna: -</div>
+                </div>
+
+                <div class="filter">
+                    <label>MES DE ANÁLISIS</label>
+                    <select id="mesSelect" class="multi-select" multiple size="6"></select>
+                    <div class="hint">Selecciona mes(es) a analizar</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPIs ADICIONALES -->
+        <section class="panel">
+            <div class="panel-title">INDICADORES AVANZADOS</div>
+
+            <div class="panel-body kpi-grid kpi-grid-4">
+                <div class="kpi kpi-red">
+                    <div class="kpi-head">
+                        <div class="kpi-title">TASA DE QUIEBRE</div>
+                        <div class="kpi-icon">⚠️</div>
+                    </div>
+                    <div id="kpiQuiebre" class="kpi-value">-</div>
+                    <div id="kpiQuiebreSub" class="kpi-sub">-</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-meta-label">Meta:</span>
+                        <span class="kpi-meta-value">&lt; 5%</span>
+                    </div>
+                </div>
+
+                <div class="kpi kpi-green">
+                    <div class="kpi-head">
+                        <div class="kpi-title">COBERTURA PROMEDIO</div>
+                        <div class="kpi-icon">📅</div>
+                    </div>
+                    <div id="kpiCobertura" class="kpi-value">-</div>
+                    <div id="kpiCoberturaSub" class="kpi-sub">-</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-meta-label">Meta:</span>
+                        <span class="kpi-meta-value">&gt; 30 días</span>
+                    </div>
+                </div>
+
+                <div class="kpi kpi-blue">
+                    <div class="kpi-head">
+                        <div class="kpi-title">ROTACIÓN DE INVENTARIO</div>
+                        <div class="kpi-icon">🔄</div>
+                    </div>
+                    <div id="kpiRotacion" class="kpi-value">-</div>
+                    <div id="kpiRotacionSub" class="kpi-sub">-</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-meta-label">Meta:</span>
+                        <span class="kpi-meta-value">&gt; 4 veces/año</span>
+                    </div>
+                </div>
+
+                <div class="kpi kpi-amber">
+                    <div class="kpi-head">
+                        <div class="kpi-title">STOCK INMOVILIZADO</div>
+                        <div class="kpi-icon">💰</div>
+                    </div>
+                    <div id="kpiInmovilizado" class="kpi-value">-</div>
+                    <div id="kpiInmovilizadoSub" class="kpi-sub">-</div>
+                    <div class="kpi-meta">
+                        <span class="kpi-meta-label">Sin movimiento:</span>
+                        <span class="kpi-meta-value">&gt; 90 días</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICO DE PARETO -->
+        <section class="panel">
+            <div class="panel-title">ANÁLISIS PARETO (80/20) - TOP 20 MATERIALES POR VALOR</div>
+            <div class="panel-body">
+                <div id="chartPareto" style="width:100%;height:450px;"></div>
+            </div>
+        </section>
+
+        <!-- SEMÁFORO DE CUMPLIMIENTO -->
+        <section class="panel">
+            <div class="panel-title">SEMÁFORO DE CUMPLIMIENTO POR CLIENTE</div>
+            <div class="panel-body">
+                <div class="table-container">
+                    <table id="tableSemaforo" class="tabla-semaforo">
+                        <thead>
+                            <tr>
+                                <th>Cliente / Obra</th>
+                                <th>% Cumplimiento</th>
+                                <th>Tendencia</th>
+                                <th>Pedidos en Riesgo</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="loading-row">Cargando datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAPA DE CALOR DE DEMORAS -->
+        <section class="panel">
+            <div class="panel-title">MAPA DE CALOR - DEMORAS POR ÁREA Y MES</div>
+            <div class="panel-body">
+                <div id="chartHeatmap" style="width:100%;height:400px;"></div>
+            </div>
+        </section>
+
+        <!-- MATRIZ ABC-XYZ -->
+        <section class="panel">
+            <div class="panel-title">CLASIFICACIÓN ABC-XYZ DE MATERIALES</div>
+            <div class="panel-subtitle">
+                Eje X: Valor de consumo (A=Alto, B=Medio, C=Bajo) |
+                Eje Y: Variabilidad de demanda (X=Constante, Y=Variable, Z=Errática)
+            </div>
+            <div class="panel-body">
+                <div id="chartMatrix" style="width:100%;height:500px;"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="last-update.js"></script>
+    <script src="mejoras.js?v=2"></script>
+</body>
+
+</html>
