@@ -1,0 +1,227 @@
+/* ============================
+   MEJORAS - ESTILOS ESPECÍFICOS
+============================ */
+
+.page-mejoras {
+    background: var(--bg-body);
+}
+
+/* KPI Meta */
+.kpi-meta {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kpi-meta-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.kpi-meta-value {
+    color: white;
+    font-weight: 700;
+}
+
+/* Panel Subtitle */
+.panel-subtitle {
+    padding: 0 20px 12px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Tabla Semáforo */
+.tabla-semaforo {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabla-semaforo thead {
+    background: linear-gradient(135deg, var(--col-brand) 0%, var(--col-brand-dk) 100%);
+    color: white;
+}
+
+.tabla-semaforo th {
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.tabla-semaforo tbody tr {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    transition: all var(--transition-fast);
+}
+
+.tabla-semaforo tbody tr:hover {
+    background: var(--bg-subtle);
+    transform: translateX(2px);
+}
+
+.tabla-semaforo td {
+    padding: 16px 12px;
+    vertical-align: middle;
+}
+
+.tabla-semaforo td:first-child {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Progress Bar */
+.progress-bar-container {
+    width: 100%;
+    max-width: 200px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 24px;
+    background: rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--col-green) 0%, var(--col-green-dk) 100%);
+    border-radius: 12px;
+    transition: width var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.progress-fill.low {
+    background: linear-gradient(90deg, var(--col-red) 0%, var(--col-red-dk) 100%);
+}
+
+.progress-fill.medium {
+    background: linear-gradient(90deg, var(--col-amber) 0%, var(--col-amber-dk) 100%);
+}
+
+/* Tendencia Icon */
+.tendencia-icon {
+    font-size: 20px;
+    display: inline-block;
+}
+
+.tendencia-up {
+    color: var(--col-green);
+}
+
+.tendencia-down {
+    color: var(--col-red);
+}
+
+.tendencia-neutral {
+    color: var(--col-slate);
+}
+
+/* Badge Riesgo */
+.badge-riesgo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-riesgo-0 {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--col-green-dk);
+}
+
+.badge-riesgo-low {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--col-blue-dk);
+}
+
+.badge-riesgo-medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--col-amber-dk);
+}
+
+.badge-riesgo-high {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--col-red-dk);
+}
+
+/* Estado Semáforo */
+.semaforo-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.semaforo-excelente {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--col-green-dk);
+}
+
+.semaforo-bueno {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--col-blue-dk);
+}
+
+.semaforo-regular {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--col-amber-dk);
+}
+
+.semaforo-critico {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--col-red-dk);
+}
+
+/* Table Container */
+.table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.loading-row {
+    text-align: center;
+    padding: 48px !important;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tabla-semaforo {
+        font-size: 12px;
+    }
+
+    .tabla-semaforo th,
+    .tabla-semaforo td {
+        padding: 10px 8px;
+    }
+
+    .progress-bar-container {
+        max-width: 150px;
+    }
+}
