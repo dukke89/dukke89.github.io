@@ -1,0 +1,215 @@
+/* =========================================
+   GUIA.CSS — Estilos exclusivos de guia.html
+   ========================================= */
+
+/* Hero intro */
+.guide-hero {
+    background: var(--col-brand-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem 2rem 1.75rem;
+    color: #fff;
+    box-shadow: var(--shadow-lg), var(--shadow-colored);
+    position: relative;
+    overflow: hidden;
+}
+
+.guide-hero::after {
+    content: '📖';
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 5rem;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.guide-hero h1 {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-main);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.guide-hero p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+/* Sección por pestaña */
+.guide-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.guide-section-header {
+    padding: 1rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.guide-section-header .gs-icon {
+    font-size: 1.5rem;
+}
+
+.guide-section-header .gs-title {
+    font-family: var(--font-main);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.guide-section-header .gs-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+}
+
+/* Colores por sección */
+.gs-mm .guide-section-header {
+    background: linear-gradient(135deg, #ede9fe, #f5f3ff);
+}
+
+.gs-mm .gs-title {
+    color: #6d28d9;
+}
+
+.gs-cumpl .guide-section-header {
+    background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+}
+
+.gs-cumpl .gs-title {
+    color: #065f46;
+}
+
+.gs-dem .guide-section-header {
+    background: linear-gradient(135deg, #fff7ed, #fffbeb);
+}
+
+.gs-dem .gs-title {
+    color: #92400e;
+}
+
+/* Grid de tarjetas */
+.guide-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+/* Tarjeta individual */
+.guide-card {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.1rem;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.guide-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.guide-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.guide-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.18rem 0.55rem;
+    border-radius: 99px;
+}
+
+.badge-filter {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-kpi {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-chart {
+    background: #fef9c3;
+    color: #92400e;
+}
+
+.badge-table {
+    background: #f3e8ff;
+    color: #6d28d9;
+}
+
+.badge-btn {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.guide-card-name {
+    font-family: var(--font-main);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.guide-card-desc {
+    font-size: 0.87rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.guide-card-tip {
+    margin-top: 0.55rem;
+    font-size: 0.82rem;
+    color: var(--col-brand-dk);
+    background: rgba(13, 148, 136, 0.06);
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--col-brand);
+}
+
+/* Dot de color KPI */
+.kpi-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.dot-blue {
+    background: #3b82f6;
+}
+
+.dot-green {
+    background: #10b981;
+}
+
+.dot-amber {
+    background: #f59e0b;
+}
+
+.dot-red {
+    background: #ef4444;
+}
+
+.dot-slate {
+    background: #64748b;
+}
