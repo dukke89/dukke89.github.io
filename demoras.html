@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO</title>
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="demoras.css" />
+
+  <!-- Chart.js (barras + tendencia) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+  <!-- Apache ECharts (dona % por área) -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+
+<body class="page-demoras">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div class="subtitle">Demoras</div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="update-box">
+        <div class="update-label">Última actualización</div>
+        <div id="lastUpdate" class="update-date">--/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab" href="analisis-mm.html">ANÁLISIS MM</a>
+    <a class="tab" href="index.html">CUMPLIMIENTO</a>
+    <a class="tab active" href="demoras.html">DEMORAS</a>
+    <a class="tab" href="ejemplo.html">📊 EJEMPLO</a>
+  </nav>
+
+  <main class="container">
+    <div id="msg"></div>
+
+    <!-- FILTROS -->
+    <section class="panel">
+      <div class="panel-title">FILTROS
+        <button class="help-btn" onclick="openHelp('Filtros — Demoras', `
+          <h4>Cliente</h4>
+          <p>Filtrá las demoras por obra o cliente específico. Seleccioná varios con <strong>Ctrl + clic</strong>.</p>
+          <h4>Clasificación</h4>
+          <p>Filtrá por tipo de abastecimiento (ALMACEN, IMPORTACIÓN, etc.).</p>
+          <h4>Mes</h4>
+          <p>Seleccioná el mes y año de entrega (formato <em>MMM-AAAA</em>). Los gráficos de área y proyecto reaccionan al mes seleccionado.</p>
+          <h4>⬇ Descargar</h4>
+          <p>Exporta el detalle de demoras según los filtros activos en formato CSV.</p>
+          <div class=&quot;hm-tip&quot;>💡 Si no seleccionás ningún filtro, se muestran todos los datos disponibles.</div>
+        `)" title="Ayuda sobre los filtros">ℹ</button>
+      </div>
+      <div class="panel-body filters filters-demoras">
+        <div class="filter">
+          <label>CLIENTE</label>
+          <select id="clienteSelect" multiple size="6" class="multi-select">
+            <option value="">Todos</option>
+          </select>
+          <div id="clienteHint" class="hint">Columna cliente: -</div>
+        </div>
+
+        <div class="filter">
+          <label>CLASIFICACIÓN</label>
+          <select id="clasif2Select" multiple size="6" class="multi-select">
+            <option value="__ALL__">Todos</option>
+          </select>
+          <div id="clasif2Hint" class="hint">Columna: -</div>
+        </div>
+
+
+        <div class="filter">
+          <label>MES</label>
+          <div class="filter-inline">
+            <select id="mesSelect" multiple size="6" class="multi-select"></select>
+            <button id="btnDownloadFiltrado" class="btn btn-sm" type="button">⬇ Descargar</button>
+          </div>
+          <div id="mesHint" class="hint">Mes seleccionado: -</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="panel">
+      <div class="panel-title">ITEMS CUMPLIDOS FT - DESGLOSE POR ÁREA
+        <button class="help-btn" onclick="openHelp('KPIs — Demoras del Mes', `
+          <h4>⏱ Demoras (Mes)</h4>
+          <p><strong>Cantidad total de pedidos FT</strong> en el mes seleccionado. Cada pedido entregado tarde cuenta como una demora.</p>
+          <h4>🏷 Área Top (Mes)</h4>
+          <p>El área con más demoras en el mes seleccionado. Identifica el sector responsable del mayor número de atrasos.</p>
+          <h4>% Top Área</h4>
+          <p>Porcentaje que representa el área top sobre el total de demoras del mes. Un valor alto indica un cuello de botella concentrado.</p>
+        `)" title="Ayuda sobre los KPIs de demoras">ℹ</button>
+      </div>
+      <div class="panel-body kpi-grid kpi-grid-3">
+        <div class="kpi kpi-blue">
+          <div class="kpi-head">
+            <div class="kpi-title">DEMORAS (MES)</div>
+            <div class="kpi-icon">⏱</div>
+          </div>
+          <div id="kpiDemorasMes" class="kpi-value">-</div>
+          <div class="kpi-sub">Cantidad de pedidos con demora</div>
+        </div>
+
+        <div class="kpi kpi-amber">
+          <div class="kpi-head">
+            <div class="kpi-title">ÁREA TOP (MES)</div>
+            <div class="kpi-icon">🏷</div>
+          </div>
+          <div id="kpiTopArea" class="kpi-value kpi-value-sm">-</div>
+          <div id="kpiTopAreaSub" class="kpi-sub kpi-sub-strong">-</div>
+        </div>
+
+        <div class="kpi kpi-green">
+          <div class="kpi-head">
+            <div class="kpi-title">% TOP ÁREA</div>
+            <div class="kpi-icon">%</div>
+          </div>
+          <div id="kpiTopPct" class="kpi-value">-</div>
+          <div class="kpi-sub">Sobre demoras del mes</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="panel">
+      <div class="panel-title">CANTIDAD Y PORCENTAJE DE DEMORAS POR MES
+        <button class="help-btn" onclick="openHelp('Gráfico — Demoras por Mes', `
+          <p>Barras apiladas por <strong>área responsable</strong> para cada mes. Muestra cuántas demoras generó cada área a lo largo del tiempo.</p>
+          <p>La <strong>línea</strong> indica el <em>% de demoras sobre el total FT</em> de ese mes.</p>
+          <div class=&quot;hm-tip&quot;>💡 Pasá el cursor sobre cada barra para ver el detalle por área.</div>
+        `)" title="Ayuda sobre el gráfico de demoras por mes">ℹ</button>
+      </div>
+      <div class="panel-body">
+        <div class="chart-card" style="width:100%;">
+
+          <div class="chart-wrap" style="height: 540px;">
+            <div id="chartMes" class="chart-box" aria-label="Demoras por mes y área"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEMORAS X AREA -->
+    <section class="panel">
+      <div class="panel-title">DEMORAS X AREA SEGUN MES SELECCIONADO
+        <button class="help-btn" onclick="openHelp('Gráfico — Demoras por Área', `
+          <p>Donut con la <strong>distribución de demoras por área responsable</strong> para el mes seleccionado.</p>
+          <p>Indica qué porcentaje del total de atrasos corresponde a cada sector en el mes consultado.</p>
+          <div class=&quot;hm-tip&quot;>💡 Un segmento muy grande indica que un área concentra la mayoría de los atrasos.</div>
+        `)" title="Ayuda sobre demoras por área">ℹ</button>
+      </div>
+      <div class="panel-body">
+        <div class="chart-card" style="width:100%;">
+
+          <div class="chart-wrap">
+            <div id="chartAreas" class="chart-box" aria-label="% de demoras por área"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EVOLUCIÓN DE DEMORAS POR ÁREA -->
+    <section class="panel">
+      <div class="panel-title">EVOLUCIÓN DE DEMORAS POR ÁREA
+        <button class="help-btn" onclick="openHelp('Gráfico — Evolución de Demoras por Área', `
+          <p>Gráfico de líneas que muestra la <strong>tendencia de demoras por cada área responsable</strong> a lo largo del tiempo.</p>
+          <p>Permite identificar áreas con mejoras o empeoramientos en sus tiempos de entrega.</p>
+          <div class=&quot;hm-tip&quot;>💡 Útil para evaluar el impacto de acciones correctivas o cambios en procesos.</div>
+        `)" title="Ayuda sobre la evolución de demoras por área">ℹ</button>
+      </div>
+      <div class="panel-body">
+        <div class="chart-card" style="width:100%;">
+          <div class="chart-wrap" style="height: 500px;">
+            <div id="chartEvolution" class="chart-box" aria-label="Evolución de demoras por área"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEMORAS SEGÚN MES (motivos/categorías) -->
+    <section class="panel">
+      <div class="panel-title">DEMORAS PROYECTO
+        <button class="help-btn" onclick="openHelp('Gráfico — Demoras por Proyecto', `
+          <p>Barras horizontales que muestran qué <strong>proyectos o clientes</strong> concentran más demoras en el mes seleccionado.</p>
+          <p>Indica qué porcentaje del total de atrasos corresponde a cada proyecto en el mes consultado.</p>
+          <div class=&quot;hm-tip&quot;>💡 Util para priorizar en qué obras focalizarse para reducir atrasos.</div>
+        `)" title="Ayuda sobre demoras por proyecto">ℹ</button>
+      </div>
+      <div class="panel-body">
+        <div class="chart-card" style="width:100%;">
+
+          <div class="chart-wrap">
+            <div id="chartMotivos" class="chart-box" aria-label="% de demoras según mes"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <script src="last-update.js"></script>
+  <script src="help.js"></script>
+  <script src="demoras.js?v=18"></script>
+</body>
+
+</html>
