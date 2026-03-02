@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ABASTECIMIENTO — Ejemplo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="ejemplo.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="title">ABASTECIMIENTO</div>
+            <div class="subtitle">Ejemplo de uso del dashboard</div>
+        </div>
+        <div class="topbar-right">
+            <div class="update-box">
+                <div class="update-label">Modo</div>
+                <div class="update-date" style="font-size:0.8rem;">Ejemplo guiado</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <a class="tab" href="analisis-mm.html">ANÁLISIS MM</a>
+        <a class="tab" href="index.html">CUMPLIMIENTO</a>
+        <a class="tab" href="demoras.html">DEMORAS</a>
+        <a class="tab active" href="ejemplo.html">📊 EJEMPLO</a>
+    </nav>
+
+    <main class="container">
+
+        <!-- HERO -->
+        <div class="ej-hero">
+            <h1>📊 ¿Cómo utilizar el Dashboard de Abastecimiento?</h1>
+            <p>Seleccioná una pestaña para ver la explicación detallada de cada sección del tablero.</p>
+        </div>
+
+        <!-- TABS NAVIGATION -->
+        <div class="ej-tabs-container">
+            <button class="ej-tab-btn active" onclick="showTab('tab-mm')">ANÁLISIS MM</button>
+            <button class="ej-tab-btn" onclick="showTab('tab-cumplimiento')">CUMPLIMIENTO</button>
+            <button class="ej-tab-btn" onclick="showTab('tab-demoras')">DEMORAS</button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB: ANÁLISIS MM
+        ═══════════════════════════════════════════════════════ -->
+        <section id="tab-mm" class="ej-tab-content active">
+            <section class="ej-scenario">
+                <div class="ej-scenario-header">
+                    <span style="font-size:1.4rem">📦</span>
+                    <div>
+                        <div class="ej-sh-title">Pestaña ANÁLISIS MM</div>
+                    </div>
+                    <span class="ej-tab-badge" style="background:#e0f2fe;color:#0369a1;margin-left:auto">ANÁLISIS
+                        MM</span>
+                </div>
+
+                <div class="ej-context">
+                    Esta pestaña permite auditar el <strong>stock físico</strong> del almacén. Ayuda a responder: ¿Qué
+                    tenemos disponible? ¿Cuál es el valor de nuestro inventario? ¿Cómo evoluciona la disponibilidad?
+                </div>
+
+                <!-- PASO 1: Filtros MM -->
+                <div class="ej-step-card step-col-1">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">1</div>
+                        <div>
+                            <div class="ej-step-title">Filtro de Almacén</div>
+                        </div>
+                    </div>
+                    <div class="ej-step-body">
+                        <div class="ej-reading">
+                            <div class="ej-reading-item ej-ri-info">
+                                <span class="ej-ri-icon">💡</span>
+                                <span>Seleccioná uno o varios <strong>CLIENTE (ALMACEN)</strong>. Al hacerlo, todos los
+                                    KPIs y gráficos se actualizarán para mostrar la realidad de ese stock
+                                    específico.</span>
+                            </div>
+                            <div class="ej-reading-item ej-ri-good">
+                                <span class="ej-ri-icon">⬇</span>
+                                <span>Podés descargar el detalle completo haciendo clic en <strong>"DESCARGAR BASE
+                                        MM"</strong>.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2: Disponibilidad -->
+                <div class="ej-step-card step-col-2">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">2</div>
+                        <div>
+                            <div class="ej-step-title">Lectura de Disponibilidad</div>
+                        </div>
+                    </div>
+                    <div class="ej-step-body">
+                        <div class="ej-reading">
+                            <div class="ej-reading-item ej-ri-info">
+                                <span class="ej-ri-icon">📦</span>
+                                <span><strong>CANT MATERIALES:</strong> Es el total de SKUs (códigos únicos) que debería
+                                    haber o hubo en ese almacén.</span>
+                            </div>
+                            <div class="ej-reading-item ej-ri-good">
+                                <span class="ej-ri-icon">✅</span>
+                                <span><strong>CANT DISPONIBLE:</strong> Cuántos de esos materiales tienen <em>Libre
+                                        Utilización > 0</em> hoy.</span>
+                            </div>
+                            <div class="ej-reading-item ej-ri-warn">
+                                <span class="ej-ri-icon">📈</span>
+                                <span><strong>DISPONIBLE (%):</strong> Es el indicador clave de salud del almacén. Si es
+                                    bajo, tenemos muchos faltantes.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3: Valorización y Estados -->
+                <div class="ej-step-card step-col-3">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">3</div>
+                        <div>
+                            <div class="ej-step-title">Estados y Valorización</div>
+                        </div>
+                    </div>
+                    <div class="ej-step-body">
+                        <div class="ej-reading">
+                            <div class="ej-reading-item ej-ri-info">
+                                <span class="ej-ri-icon">🍩</span>
+                                <span>El gráfico de <strong>ESTADOS</strong> separa el stock en: Libre Utilización,
+                                    Bloqueado, Control de Calidad, etc.</span>
+                            </div>
+                            <div class="ej-reading-item ej-ri-alert">
+                                <span class="ej-ri-icon">💰</span>
+                                <span>La <strong>VALORIZACIÓN DE STOCK</strong> ordena los rubros por costo. Esto
+                                    permite priorizar dónde está "parado" el dinero de la empresa.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB: CUMPLIMIENTO
+        ═══════════════════════════════════════════════════════ -->
+        <section id="tab-cumplimiento" class="ej-tab-content">
+            <section class="ej-scenario">
+                <div class="ej-scenario-header">
+                    <span style="font-size:1.4rem">✅</span>
+                    <div>
+                        <div class="ej-sh-title"> Pestaña CUMPLIMIENTO</div>
+                    </div>
+                    <span class="ej-tab-badge badge-cumpl" style="margin-left:auto">CUMPLIMIENTO</span>
+                </div>
+
+                <!-- PASO 1: Filtros -->
+                <section class="ej-step-block" data-step="1">
+                    <div class="ej-step-card step-col-1">
+                        <div class="ej-step-header">
+                            <div class="ej-num-badge">1</div>
+                            <div class="ej-step-title">Selección de filtros</div>
+                        </div>
+                        <div class="ej-step-body">
+                            <div class="ej-kpi-static-img">
+                                <img src="img/FILTROS.JPG" alt="Filtros">
+                            </div>
+                            <div class="ej-reading">
+                                <div class="ej-reading-item ej-ri-info">
+                                    <span class="ej-ri-icon">💡</span>
+                                    <span>Elegí el <strong>CLIENTE/OBRA</strong> y el <strong>MES DE ENTREGA</strong>
+                                        para analizar el desempeño de envíos.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PASO 2: KPIs Acumulados -->
+                <section class="ej-step-block" data-step="2">
+                    <div class="ej-step-card step-col-2">
+                        <div class="ej-step-header">
+                            <div class="ej-num-badge">2</div>
+                            <div class="ej-step-title">Cumplimiento Acumulado (12 meses)</div>
+                        </div>
+                        <div class="ej-step-body">
+                            <div class="ej-kpi-static-img">
+                                <img src="img/ACUMULADO.JPG" alt="Cumplimiento acumulado">
+                            </div>
+                            <div class="ej-kpi-explains">
+                                <div class="ej-kpi-explain-item">
+                                    <span class="ej-kpi-explain-badge"
+                                        style="background:#dbeafe;color:#1d4ed8">COMPROMETIDOS</span>
+                                    <span>Total de pedidos a gestionar en el año.</span>
+                                </div>
+                                <div class="ej-kpi-explain-item">
+                                    <span class="ej-kpi-explain-badge" style="background:#dcfce7;color:#166534">AT (A
+                                        TIEMPO)</span>
+                                    <span>Pedidos que llegaron en plazo (Objetivo 2026: <strong>78%</strong>).</span>
+                                </div>
+                                <div class="ej-kpi-explain-item">
+                                    <span class="ej-kpi-explain-badge" style="background:#fee2e2;color:#991b1b">NE (NO
+                                        ENTREGADOS)</span>
+                                    <span>Pedidos pendientes de entrega (Mayor riesgo).</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PASO 4: Gráfico -->
+                <section class="ej-step-block" data-step="4">
+                    <div class="ej-step-card step-col-4">
+                        <div class="ej-step-header">
+                            <div class="ej-num-badge">4</div>
+                            <div class="ej-step-title">Gráfico de cumplimiento por mes</div>
+                        </div>
+                        <div class="ej-step-body">
+                            <div class="ej-kpi-static-img">
+                                <img src="img/GRAFICO.JPG" alt="Gráfico cumplimiento">
+                            </div>
+                            <div class="ej-reading">
+                                <div class="ej-reading-item ej-ri-warn">
+                                    <span class="ej-ri-icon">📊</span>
+                                    <span>Permite ver la evolución mes a mes. Si la barra es más verde, el cumplimiento
+                                        es mejor.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB: DEMORAS
+        ═══════════════════════════════════════════════════════ -->
+        <section id="tab-demoras" class="ej-tab-content">
+            <section class="ej-scenario">
+                <div class="ej-scenario-header">
+                    <span style="font-size:1.4rem">⏱</span>
+                    <div>
+                        <div class="ej-sh-title"> Pestaña DEMORAS</div>
+                    </div>
+                    <span class="ej-tab-badge badge-dem" style="margin-left:auto">DEMORAS</span>
+                </div>
+
+                <div class="ej-context">
+                    Esta pestaña se usa para <strong>encontrar la causa raíz</strong> de los pedidos que llegaron tarde
+                    (FT).
+                </div>
+
+                <!-- PASO 2: KPIs DEMORAS -->
+                <div class="ej-step-card step-col-2">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">1</div>
+                        <div class="ej-step-title">Área con más demoras</div>
+                    </div>
+                    <div class="ej-step-body">
+                        <div class="ej-kpi-static-img">
+                            <img src="img/TARJETAS DEMORAS.JPG" alt="Tarjetas demoras">
+                        </div>
+                        <div class="ej-reading">
+                            <div class="ej-reading-item ej-ri-alert">
+                                <span class="ej-ri-icon">🏷</span>
+                                <span>Identifica qué área (Compras, Logística, Almacén) concentra el mayor % de
+                                    atrasos.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3: Gráfico área -->
+                <div class="ej-step-card step-col-3">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">2</div>
+                        <div class="ej-step-title">Evolución y Distribución</div>
+                    </div>
+                    <div class="ej-step-body">
+                        <div class="ej-kpi-static-img">
+                            <img src="img/GRAFICO BARRAS DEMORAS.JPG" alt="Gráfico demoras">
+                        </div>
+                        <div class="ej-reading">
+                            <div class="ej-reading-item ej-ri-info">
+                                <span class="ej-ri-icon">🔍</span>
+                                <span>Analizá los <strong>Días de Demora Promedio</strong> por área para priorizar
+                                    acciones correctivas.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ej-conclusion">
+                    <div class="ej-conclusion-title">🎯 Flujo Recomendado</div>
+                    <p>
+                        <strong>CUMPLIMIENTO:</strong> Detectar que hay un problema (baja el % AT). <br>
+                        <strong>DEMORAS:</strong> Identificar qué área causó los atrasos para tomar acción.
+                    </p>
+                </div>
+            </section>
+        </section>
+
+        <!-- FOOTNOTE -->
+        <div class="footnote" style="display:block !important; margin-top:2rem;">
+            Ejemplo de Dashboard de Abastecimiento — Los valores mostrados son ilustrativos para explicar el uso del
+            sistema.
+        </div>
+
+    </main>
+
+    <script src="help.js"></script>
+</body>
+
+</html>
