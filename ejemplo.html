@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ABASTECIMIENTO — Ejemplo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="ejemplo.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="title">ABASTECIMIENTO</div>
+            <div class="subtitle">Ejemplo de uso del dashboard</div>
+        </div>
+        <div class="topbar-right">
+            <div class="update-box">
+                <div class="update-label">Modo</div>
+                <div class="update-date" style="font-size:0.8rem;">Ejemplo guiado</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <a class="tab" href="analisis-mm.html">ANÁLISIS MM</a>
+        <a class="tab" href="index.html">CUMPLIMIENTO</a>
+        <a class="tab" href="demoras.html">DEMORAS</a>
+        <a class="tab active" href="ejemplo.html">📊 EJEMPLO</a>
+    </nav>
+
+    <main class="container">
+
+        <div class="ej-hero">
+            <h1>📊 ¿Cómo utilizar el Dashboard de Abastecimiento?</h1>
+            <p>Seleccioná una pestaña para ver la explicación detallada de cada sección del tablero.</p>
+        </div>
+
+        <!-- TABS NAVIGATION -->
+        <div class="ej-tabs-container">
+            <button class="ej-tab-btn active" onclick="showTab('tab-mm')">ANÁLISIS MM</button>
+            <button class="ej-tab-btn" onclick="showTab('tab-cumplimiento')">CUMPLIMIENTO</button>
+            <button class="ej-tab-btn" onclick="showTab('tab-demoras')">DEMORAS</button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB: ANÁLISIS MM
+        ═══════════════════════════════════════════════════════ -->
+        <section id="tab-mm" class="ej-tab-content active">
+            <section class="ej-scenario">
+                <div class="ej-scenario-header">
+                    <span style="font-size:1.4rem">📦</span>
+                    <div>
+                        <div class="ej-sh-title">ANÁLISIS MM</div>
+                    </div>
+                    <span class="ej-tab-badge" style="background:#e0f2fe;color:#0369a1;margin-left:auto">ANÁLISIS
+                        MM</span>
+                </div>
+                <!--FILTROS-->
+                <div class="ej-step-card step-col-1">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">1</div>
+                        <div class="ej-step-title">Filtro de Almacén</div>
+                    </div>
+                    <div class="ej-step-body">
+                    <!-- Acá va la imagen del filtro -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/FILTROS_MM.JPG" alt="Filtros">
+                    </div>    
+                    
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>En el siguiente filtro <strong>CLIENTE (ALMACÉN)</strong> seleccioná de la lista el proyecto que desees analizar. Por ej.: Si
+                                querés ver el almacén definitivo de la obra <strong>"00341 Mov. Suelos San Luis"</strong>, seleccioná <strong>"0035 y 0341"</strong> ya que esta obra tiene dos almacenes.
+                                Para seleccionar más de un almacén definitivo, mantené presionada la tecla <strong>Ctrl</strong>.</span>
+                        </div>
+                    </div>
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>Desde el botón <strong>DESCARGAR BASE MM</strong> se puede descargar el maestro de materiales completo</span>
+                        </div>
+                    </div>
+                    </div>
+                </div>    
+                <div>
+                    <!--TARJETAS DE DISPONIBILIDAD-->
+                    <div class="ej-step-card step-col-1">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">2</div>
+                        <div class="ej-step-title">TARJETAS DE DISPONIBILIDAD</div>
+                    </div>
+                    <div class="ej-step-body">
+                    <!-- Acá va la imagen del filtro -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/TARJERAS MM.JPG" alt="Filtros">
+                    </div>    
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span><strong>CANT MATERIALES</strong>: Es la cantidad de materiales planificados en el MM .</span>
+                        </div>
+                    </div>
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span><strong>CANT DISPONIBLE</strong>: Es la cantidad de materiales disponibles (con stock distinto de cero).</span>
+                        </div>
+                    </div>
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span><strong>DISPONIBLE</strong>: Representa la cantidad de materiales disponibles en porcentaje.</span>
+                        </div>
+                    </div>
+                    
+                    </div>
+                </div>
+            </div>
+            
+            <!--GRAFICO DE ESTADOS-->
+            <div class="ej-step-card step-col-1">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">3</div>
+                        <div class="ej-step-title">ESTADOS</div>
+                    </div>
+                    <div class="ej-step-body">
+                    <!-- Acá va la imagen del filtro -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/ESTADO_MM.JPG" alt="Filtros">
+                    </div>
+
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>Este gráfico circular representa la disponibilidad de materiales del almacén seleccionado</span>
+                        </div>
+                    </div>
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>Al stock de materiales los clasificamos en STOCK NULO, STOCK MENOR AL PP, STOCK MAYOR AL PP, STOCK
+                                MAYOR AL STOCK MAXIMO. Se puede descargar cada una de estas clasificaciones haciendo clic en los botones correspondientes. 
+                            </span>
+                        </div>
+                    </div>
+                    </div>                    
+                </div>
+            </div>
+
+
+                <div>
+                    <!--VALORIZACION DE STOCK-->
+                    <div class="ej-step-card step-col-1">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">4</div>
+                        <div class="ej-step-title">VALORIZACION DE STOCK</div>
+                    </div>
+                    <div class="ej-step-body">
+                    <!-- Acá va la imagen del filtro -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/VALORIZACION.JPG" alt="Filtros">
+                    </div>
+                    
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>Esta tabla muestra la valorización de stock por <strong>RUBRO</strong> del almacén seleccionado</span>
+                        </div>
+                    </div>
+
+                    <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">⚠️</span>
+                            <span><strong>ALERTAS</strong>: Tené en cuenta que cuando veas RUBROS (vacios, ?, otros, obsoleto) aparecerá
+                                en rojo, y podés ver los códigos de materiales sin rubro presionando el botón <strong>SIN RUBRO</strong>. Completá el rubro y envíalo a <strong>abastecimiento.sap</strong> .</span>
+                        </div>
+                    </div>
+                    
+                    </div>
+                </div>
+
+
+                 <div>
+                    <!--VALORIZACION DE STOCK-->
+                    <div class="ej-step-card step-col-1">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">5</div>
+                        <div class="ej-step-title">EVOLUCION DEL MAESTRO DE MATERIALES</div>
+                    </div>
+                    <div class="ej-step-body">
+                    <!-- Acá va la imagen del filtro -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/EVOLUCION.JPG" alt="Filtros">
+                    </div>
+                    
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>Primero seleccioná la obra en el filtro</span>
+                        </div>
+                    </div>
+
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>Podrás ver la evolución del maestro de materiales a lo largo del año. Tanto la disponibilidad como las cantidades están promediadas mensualmente</span>
+                        </div>
+                    </div>
+                    
+                    </div>
+                </div>
+
+           </section>  
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB: CUMPLIMIENTO
+        ═══════════════════════════════════════════════════════ -->
+        <section id="tab-cumplimiento" class="ej-tab-content">
+            <section class="ej-scenario">
+                <div class="ej-scenario-header">
+                    <span style="font-size:1.4rem">✅</span>
+                    <div>
+                        <div class="ej-sh-title">CUMPLIMIENTO</div>
+                    </div>
+                    <span class="ej-tab-badge badge-cumpl" style="margin-left:auto">CUMPLIMIENTO</span>
+                </div>
+
+                <section class="ej-step-block" data-step="1">
+                    <div class="ej-step-card step-col-1">
+                        <!-- PASO 1: Filtros (PRESERVING USER CONTENT) -->
+                        <div class="ej-step-header">
+                            <div class="ej-num-badge">1</div>
+                            <div class="ej-step-title">Selección de filtros</div>
+                        </div>
+                        <div class="ej-step-body">
+                            <div class="ej-kpi-static-img">
+                                <img src="img/FILTROS.JPG" alt="Filtros">
+                            </div>
+                            <div class="ej-reading">
+                                <div class="ej-reading-item ej-ri-info">
+                                    <span class="ej-ri-icon">📌</span>
+                                    <span>En el primer filtro <strong>CLIENTE/OBRA</strong> elegí de la lista la obra
+                                        que desees. Por ej.: <strong>"00341 Mov. Suelos San Luis"</strong>. Si
+                                        querés ver solo el mes de enero, seleccioná <strong>"2026-01"</strong> en el
+                                        filtro de
+                                        <strong>MES DE ENTREGA</strong> con un click.</span>
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PASO 2: KPIs Acumulados -->
+            <section>
+            <div class="ej-step-card step-col-2">
+                <div class="ej-step-header">
+                    <div class="ej-num-badge">2</div>
+                    <div>
+                        <div class="ej-step-title">Leemos las tarjetas de cumplimiento acumulado</div>
+                    </div>
+                </div>
+                <div class="ej-step-body">
+                    <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 0.75rem;">
+                        En estas tarjetas se muestra el cumplimiento acumulado de la obra seleccionada de los <strong>últimos 12
+                            meses</strong>, independientemente del mes que hayamos filtrado.
+                    </p>
+                    <!-- KPI acumulado -->
+                      <!-- ACÁ AGREGO LA IMAGEN -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/ACUMULADO.JPG" alt="Cumplimiento acumulado (últimos 12 meses)">
+                    </div>
+
+                    <!-- ¿Qué dice cada tarjeta? -->
+                    <div class="ej-kpi-explains">
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📦</span>
+                            <span class="ej-kpi-explain-badge"
+                                style="background:#dbeafe;color:#1d4ed8">COMPROMETIDOS</span>
+                            <span>
+                                En la obra <strong>"00341 Mov. Suelos San Luis"</strong> nos comprometimos a entregar/gestionar <strong>3583</strong> ítems en los últimos 12 meses.
+                            </span>
+                        </div>
+                        </div>
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">✅</span>
+                            <span class="ej-kpi-explain-badge" style="background:#dcfce7;color:#166534">ENTREGADOS A
+                                TIEMPO (AT)</span>
+                            <span>
+                                De los cuales el <strong>78,5%</strong> de esos ítems fue entregado dentro del plazo acordado,es decir, 2813 items llegaron a tiempo a la obra y figura en <strong>verde</strong> porque alcanzo el objetivo del <strong>78%</strong> establecido para el año 2026.
+                            </span>
+                        </div> 
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">⚠️</span>
+                            <span class="ej-kpi-explain-badge" style="background:#fef3c7;color:#92400e">FUERA DE TIEMPO
+                                (FT)</span>
+                            <span>
+                                El <strong>21,5%</strong> de los ítems fueron entregados fuera del plazo comprometido; es decir, 769 ítems llegaron con demora a la obra.
+                                Para comprender las causas, es necesario analizar el detalle en la pestaña Demoras.
+                            </span>
+                        </div> 
+                        
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">🚫</span>
+                            <span class="ej-kpi-explain-badge" style="background:#fee2e2;color:#991b1b">NO ENTREGADOS
+                                (NE)</span>
+                            <span>
+                                <strong>Falta entregar 1 item a Obra</strong>. Estos son los de mayor riesgo, hay que ponerse en contacto 
+                            con quien corresponda para que se entregue lo antes posible. Para poder visualizar cuál es el ítem solo debés hacer clic
+                            en el botón <strong>"Descargar NO entregados"</strong> en la sección de filtros. 
+                            </span>
+                        </div> 
+
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📅</span>
+                            <span class="ej-kpi-explain-badge" style="background:#f1f5f9;color:#475569">DEMORA
+                                PROMEDIO</span>
+                            <span> De los pedidos que llegaron tarde (FT), la <strong>demora promedio fue de 9 días</strong> durante los últimos 12 meses. Figura en color 
+                            rojo porque supera el máximo establecido de 7 días. </span>
+                            </span>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+            </section>
+
+            <section>
+            <!-- PASO 3: KPIs Mes -->
+            <div class="ej-step-card step-col-3">
+                <div class="ej-step-header">
+                    <div class="ej-num-badge">3</div>
+                    <div>
+                        <div class="ej-step-title">Leemos las tarjetas del mes seleccionado</div>
+                    </div>
+                </div>
+                <div class="ej-step-body">
+                    <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 0.75rem;">
+                        La segunda fila muestra <strong>solo el mes que filtramos</strong> (Ene-2026).
+                    </p>
+
+                      <!-- ACÁ AGREGO LA IMAGEN -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/MENSUAL.JPG" alt="Cumplimiento MENSUAL (últimos 12 meses)">
+                    </div>
+
+                    <!-- ¿Qué dice cada tarjeta del mes? -->
+                    <div class="ej-kpi-explains">
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📦</span>
+                            <span class="ej-kpi-explain-badge"
+                                style="background:#dbeafe;color:#1d4ed8">COMPROMETIDOS</span>
+                            <span>
+                                En la obra <strong>"00341 Mov. Suelos San Luis"</strong> nos comprometimos a entregar/gestionar <strong>204</strong> ítems en el mes de enero.
+                            </span>
+                        </div>
+                        </div>
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">✅</span>
+                            <span class="ej-kpi-explain-badge" style="background:#dcfce7;color:#166534">ENTREGADOS A
+                                TIEMPO (AT)</span>
+                            <span>
+                                De los cuales el <strong>72,1%</strong> de esos ítems fue entregado dentro del plazo acordado,es decir, 147 items llegaron a tiempo a la obra y figura en <strong>rojo</strong> porque no alcanzo el objetivo del <strong>78%</strong> establecido para el año 2026.
+                            </span>
+                        </div> 
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">⚠️</span>
+                            <span class="ej-kpi-explain-badge" style="background:#fef3c7;color:#92400e">FUERA DE TIEMPO
+                                (FT)</span>
+                            <span>
+                                El <strong>27,5%</strong> de los ítems se entregaron fuera del plazo comprometido; es decir, 56 ítems llegaron tarde a la obra. Para comprender las causas, es necesario analizar el detalle en la pestaña <strong>Demoras</strong>.
+                            </span>
+                        </div> 
+                        
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">🚫</span>
+                            <span class="ej-kpi-explain-badge" style="background:#fee2e2;color:#991b1b">NO ENTREGADOS
+                                (NE)</span>
+                            <span>
+                                <strong>Falta entregar 1 ítem a obra</strong>. Estos son los de mayor riesgo, hay que ponerse en contacto 
+                            con quien corresponda para que se entregue lo antes posible. Para poder visualizar cuál es el ítem solo debés hacer clic
+                            en el botón <strong>"Descargar NO entregados"</strong> en la sección de filtros. 
+                            </span>
+                        </div> 
+
+                        <div class="ej-kpi-explain-item">
+                            <div class="ej-reading-item ej-ri-info">
+                            <span class="ej-ri-icon">📅</span>
+                            <span class="ej-kpi-explain-badge" style="background:#f1f5f9;color:#475569">DEMORA
+                                PROMEDIO</span>
+                            <span> De los pedidos que llegaron tarde (FT), la <strong>demora promedio fue de 11 días</strong> durante el mes de enero 2026. Figura en color 
+                            rojo porque supera el máximo establecido de 7 días. </span>
+                            </span>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+        </section>
+
+            <!-- PASO 4: Gráfico de barras -->
+            <div class="ej-step-card step-col-4">
+                <div class="ej-step-header">
+                    <div class="ej-num-badge">4</div>
+                    <div>
+                        <div class="ej-step-title">Analizamos el gráfico de cumplimiento por mes</div>
+                        <div class="ej-step-action">¿Los números mejoran o empeoran mes a mes?</div>
+                    </div>
+                </div>
+                <div class="ej-step-body">
+                 <!-- ACÁ AGREGO LA IMAGEN -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/GRAFICO.JPG" alt="Grafico cumplimiento">
+                    </div>
+                
+                    </div>
+
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>El gráfico de barras apiladas nos muestra el cumplimiento mes a mes. Cada barra suma 100% 
+                                y se divide en <span style="color:#10b981;font-weight:700">Entregados a término (AT)</span>,
+                                <span style="color:#f59e0b;font-weight:700">Entregados fuera de término (FT)</span> y 
+                                <span style="color:#ef4444;font-weight:700">No entregados (NE):</span></span>
+                        </div>
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📊</span>
+                            <span>Podemos ver que de diciembre 2025 a Enero 2026 hubo una disminución de ítems Entregados a término (AT) 
+                                de un 76% a 72% y figura con alerta en rojo porque no supera el 78% objetivo establecido para el 2026.</span>
+                        </div>
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📊</span>
+                            <span>También podemos ver el % de ítems entregados fuera de término (FT) en un 27% como indicaban las tarjetas 
+                                y el Promedio de días de demora en color celeste, vemos cómo aumenta de 10 dias a 11 dias de Diciembre a Enero 2026.</span>
+                        </div>
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">🔍</span>
+                            <span>En enero 2026 las tarjetas nos indican que tenemos 1 ítem No entregados (NE) si no figura en el gráfico solo tenes 
+                                que poner el cursor del mouse sobre la columna del mes, aparecerá una pequeña ventana con todos los datos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ej-step-card step-col-4">
+                <div class="ej-step-header">
+                    <div class="ej-num-badge">5</div>
+                    <div>
+                        <div class="ej-step-title">Analizamos el gráfico de cumplimiento por mes</div>
+                        <div class="ej-step-action">¿Los números mejoran o empeoran mes a mes?</div>
+                    </div>
+                </div>
+                <div class="ej-step-body">
+                 <!-- ACÁ AGREGO LA IMAGEN -->
+                     <div class="ej-kpi-static-img">
+                        <img src="img/TENDENCIA.JPG" alt="Grafico cumplimiento">
+                    </div>
+                
+                    </div>
+
+                    <div class="ej-reading">
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>El gráfico de barras apiladas nos muestra el cumplimiento mes a mes. Cada barra suma 100% 
+                                y se divide en <span style="color:#10b981;font-weight:700">Entregados a término (AT)</span>,
+                                <span style="color:#f59e0b;font-weight:700">Entregados fuera de término (FT)</span> y 
+                                <span style="color:#ef4444;font-weight:700">No entregados (NE):</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            </section>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB: DEMORAS
+        ═══════════════════════════════════════════════════════ -->
+        <section id="tab-demoras" class="ej-tab-content">
+            <section class="ej-scenario">
+                <div class="ej-scenario-header">
+                    <span style="font-size:1.4rem">⏱</span>
+                    <div>
+                        <div class="ej-sh-title">DEMORAS</div>
+                    </div>
+                    <span class="ej-tab-badge badge-dem" style="margin-left:auto">DEMORAS</span>
+                </div>
+
+                <section class="ej-step-block" data-step="1">
+                    <div class="ej-step-card step-col-1">
+                        <!-- PASO 1: Filtros (PRESERVING USER CONTENT) -->
+                        <div class="ej-step-header">
+                            <div class="ej-num-badge">1</div>
+                            <div class="ej-step-title">Selección de filtros</div>
+                        </div>
+                        <div class="ej-step-body">
+                            <div class="ej-kpi-static-img">
+                                <img src="img/FILTRO DEMORAS.JPG" alt="Filtros">
+                            </div>
+                            <div class="ej-reading">
+                                <div class="ej-reading-item ej-ri-info">
+                                    <span class="ej-ri-icon">📌</span>
+                                    <span>En el filtro <strong>CLIENTE</strong> elegí de la lista la obra
+                                        que desees. Por ej.: <strong>"00341 Mov. Suelos San Luis"</strong>. Si
+                                        querés ver solo el mes de enero, seleccioná <strong>"ENERO 2026"</strong> en el
+                                        filtro de <strong>MES</strong> con un click.</span>
+                                </div>
+                                <div class="ej-reading-item ej-ri-info">
+                                    <span class="ej-ri-icon">📌</span>
+                                    <span>Podes descargar las demoras (Items entregados FT) haciendo click en el botón <strong>Descargar</strong></span>
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </div>
+                </section>
+                <!--GRAFICO DE DEMORAS-->
+                <div class="ej-step-card step-col-2">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">2</div>
+                        <div class="ej-step-title">CANTIDAD DE DEMORAS POR MES Y POR ÁREA</div>
+                    </div>
+                    <div class="ej-step-body">
+                       
+                        <div class="ej-kpi-static-img" style="margin-top:1rem">
+                            <img src="img/GRAFICO BARRAS DEMORAS.JPG" alt="Gráfico demoras">
+                        </div>
+
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>
+                                📊 Este gráfico muestra la cantidad total de demoras por mes, desglosadas por área, 
+                                    junto con el porcentaje que representa cada una dentro del total mensual.
+                                    <br>
+                                   🔴El área con mayor cantidad de demoras se identifica con el color <strong>rojo</strong><br>
+                                   🔵Tener en cuenta siempre que una demora puede repetirse en varias áreas.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!--GRAFICO CIRCULAR DEMORAS MENSUAL X AREA-->
+                <div class="ej-step-card step-col-2">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">3</div>
+                        <div class="ej-step-title">CANTIDAD DE DEMORAS POR MES SELECCIONADO Y POR ÁREA</div>
+                    </div>
+                    <div class="ej-step-body">
+                       
+                        <div class="ej-kpi-static-img" style="margin-top:1rem">
+                            <img src="img/Grafico mensual DEMORAS AREA.JPG" alt="Gráfico demoras">
+                        </div>
+
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>
+                                1️⃣ Gráfico circular<br>
+                                <p>Este gráfico muestra la distribución 
+                                porcentual de las demoras por área en el mes que se encuentra seleccionado en el filtro.</p>
+                                <p>El área con mayor cantidad de demoras se muestra en <strong>rojo</strong></p>
+                            </span>
+                        </div>
+
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>
+                                2️⃣ Tabla con mapa de calor<br>
+
+                                “Muestra la cantidad de demoras por mes y por área (<strong>tener en cuenta que una demora puede repetirse en varias áreas</strong>)”
+                                <br>
+                                🔥 ¿Qué significa el color?<br>
+                                🔴 Rojo → Mayor cantidad de demoras<br>
+                                🟠 Naranja → Nivel medio<br>
+                                🟡 Amarillo → Nivel bajo<br>
+                                ⚪ Claro → Muy bajo</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!--GRAFICO AREA PROYECTO-->
+                <div class="ej-step-card step-col-2">
+                    <div class="ej-step-header">
+                        <div class="ej-num-badge">4</div>
+                        <div class="ej-step-title">DEMORAS PROYECTO</div>
+                    </div>
+                    <div class="ej-step-body">
+                       
+                        <div class="ej-kpi-static-img" style="margin-top:1rem">
+                            <img src="img/DEMORAS PROYECTO.JPG" alt="Gráfico demoras">
+                        </div>
+
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>
+                                1️⃣ Gráfico circular<br>
+                                <p>Este gráfico muestra el motivo de las demoras correspondientes al Área Proyecto, desagregadas 
+                                    por tipo de causa.</p>
+                                <p>El área con mayor cantidad de demoras se muestra en <strong>rojo</strong></p>
+                            </span>
+                        </div>
+
+                        <div class="ej-reading-item ej-ri-good">
+                            <span class="ej-ri-icon">📌</span>
+                            <span>
+                                2️⃣ Tabla con mapa de calor<br>
+
+                                🔥 ¿Qué significa el color?<br> 
+                                🔴 Rojo → Mayor cantidad de demoras<br>
+                                🟠 Naranja → Nivel medio<br>
+                                🟡 Amarillo → Nivel bajo<br>
+                                ⚪ Claro → Muy bajo</p>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </section>
+
+        <!-- FOOTNOTE -->
+        <div class="footnote" style="display:block !important; margin-top:2rem;">
+            Ejemplo de Dashboard de Abastecimiento — Valores ilustrativos.
+        </div>
+    </main>
+
+    <script src="help.js"></script>
+    <script>
+        function showTab(tabId) {
+            // Remove active class from all tabs content
+            document.querySelectorAll('.ej-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.ej-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active class to selected tab content
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            // Find and activate the button that was clicked
+            document.querySelectorAll('.ej-tab-btn').forEach(btn => {
+                if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
