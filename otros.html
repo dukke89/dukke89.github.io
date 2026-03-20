@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO - OTROS</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="base.css" />
+  <style>
+    /* Estilos para la tabla pivot */
+    .pt-container {
+      width: 100%;
+      overflow-x: auto;
+      background: #fff;
+      padding: 10px;
+    }
+    .pivot-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+      min-width: 900px;
+    }
+    .pivot-table th {
+      background: #bce6f4;
+      text-align: left;
+      padding: 8px 6px;
+      font-weight: bold;
+      border-right: 1px solid #fff;
+      border-bottom: 2px solid #99d6ea;
+    }
+    .pivot-table td {
+      padding: 4px 6px;
+      vertical-align: top;
+      border-right: 1px solid #eee;
+    }
+    .pt-group-row {
+      background: #fdfdfd;
+      font-weight: bold;
+      cursor: pointer;
+      border-top: 1px solid #ccc;
+    }
+    .pt-group-row:hover {
+      background: #f1f8ff;
+    }
+    .pt-group-total {
+      font-weight: bold;
+      background: #ffff00;
+      border-bottom: 1px solid #ccc;
+    }
+    .pt-grand-total {
+      font-weight: bold;
+      background: #bce6f4;
+      border-top: 2px solid #99d6ea;
+    }
+    .pt-detail-row {
+      background: #fff;
+    }
+    .pt-detail-row.hide {
+      display: none;
+    }
+    .pt-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 12px;
+      height: 12px;
+      text-align: center;
+      color: #333;
+      border: 1px solid #999;
+      background: #fff;
+      margin-right: 5px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .num {
+      text-align: right;
+    }
+    /* Header table global */
+    .pt-top-header {
+      background: #bce6f4;
+      font-weight: bold;
+      padding: 8px;
+    }
+  </style>
+</head>
+
+<body class="page-otros">
+  <!-- LOADER -->
+  <div id="loader" class="loader-overlay" style="display:flex;">
+    <div class="spinner-bars">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+    <div class="loading-text">Cargando datos...</div>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div class="subtitle">Análisis de Entregas - OTROS</div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab" href="analisis-mm.html">ANÁLISIS MM</a>
+    <a class="tab" href="index.html">CUMPLIMIENTO</a>
+    <a class="tab" href="demoras.html">DEMORAS</a>
+    <a class="tab" href="ejemplo.html">📊 EJEMPLO</a>
+    <a class="tab active" href="otros.html">OTROS</a>
+  </nav>
+
+  <main class="container">
+    <div id="msg"></div>
+
+    <!-- FILTROS -->
+    <section class="panel">
+      <div class="panel-title">FILTROS</div>
+      <div class="panel-body filters filters-1">
+        <div class="filter" style="flex:1; max-width: 400px;">
+          <label>NOMBRE DESTINATARIO DE MERCANCÍAS</label>
+          <select id="destinatarioSelect" multiple size="6" class="multi-select">
+            <option value="">Todos</option>
+          </select>
+          <div class="hint">Columna: Nombre destinatario de mercancías</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLA PIVOT -->
+    <section class="panel">
+      <div class="panel-title">TABLA DETALLE</div>
+      <div class="panel-body pt-container" id="pivotContainer">
+        <!-- Renderizado desde JS -->
+      </div>
+    </section>
+  </main>
+
+  <script src="otros.js"></script>
+</body>
+
+</html>
