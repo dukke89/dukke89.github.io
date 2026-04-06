@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <script>
+    if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = 'login.html';
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO</title>
+
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="analisis-mm.css?v=20251229202542" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+
+<body class="page-mm">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div class="subtitle">Análisis MM</div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="update-box">
+        <div class="update-label">Última actualización</div>
+        <div id="lastUpdate" class="update-date">--/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <a class="tab active" href="analisis-mm.html">ANÁLISIS MM</a>
+    <a class="tab" href="index.html">CUMPLIMIENTO</a>
+    <a class="tab" href="demoras.html">DEMORAS</a>
+    <a class="tab" href="ejemplo.html">📊 EJEMPLO</a>
+  </nav>
+
+  <main class="container">
+    <div id="msg"></div>
+
+    <!-- FILTRO -->
+    <section class="panel">
+      <div class="panel-title">FILTROS
+        <button class="help-btn" onclick="openHelp('Filtro — Análisis MM', `
+          <h4>Cliente (Almacén)</h4>
+          <p>Seleccioná uno o varios almacenes para filtrar. </p>
+          <h4>⬇ Descargar BASE MM</h4>
+          <p>Exporta el Maestro de materiales del almacén seleccionado, compatible con Excel (separador <strong>;</strong>).</p>
+          <div class=&quot;hm-tip&quot;>💡 Podés seleccionar múltiples almacenes con <strong>Ctrl + clic</strong>.</div>
+        `)" title="Ayuda sobre el filtro de almacén">ℹ</button>
+      </div>
+      <div class="panel-body mm-filter-row">
+        <div class="filter">
+          <label>CLIENTE (ALMACEN)</label>
+          <div class="mm-client-row">
+            <select id="clienteSelect" class="multi-select" multiple size="6"></select>
+          </div>
+
+          <div id="clienteHint" class="hint">Columna: -</div>
+          <div class="hint">Descarga segun el almacen seleccionado</div>
+          <div class="hint">Mantén presionado Ctrl y haz clic en los almacenes para seleccion multiple</div>
+        </div>
+      </div>
+
+
+
+      <div class="filter mm-source">
+        <div class="hint"><b>Fuente:</b> ANALISIS-MM.csv</div>
+      </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="panel">
+      <div class="panel-title">DISPONIBILIDAD
+        <button class="help-btn" onclick="openHelp('KPIs — Disponibilidad', `
+          <h4>📦 Cant. Materiales</h4>
+          <p>Es la cantidad de materiales distintos planificados en el MM de acuerdo a la selección filtrada.</p>
+          <h4>✅ Cant. Disponible</h4>
+          <p>Es la cantidad de materiales disponibles (con stock distinto de cero) de acuerdo a la última actualización.</p>
+          <h4>📈 % Disponible</h4>
+          <p>Representa la cantidad de materiales disponibles en porcentaje.</p>
+        `)" title="Ayuda sobre los KPIs de disponibilidad">ℹ</button>
+      </div>
+
+      <div class="panel-body kpi-grid kpi-grid-3">
+        <div class="kpi kpi-blue">
+          <div class="kpi-head">
+            <div class="kpi-title">CANT MATERIALES</div>
+            <div class="kpi-icon">📦</div>
+          </div>
+          <div id="kpiMat" class="kpi-value">-</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 8px;">
+            <div class="kpi-sub kpi-sub-strong" style="margin: 0;">Materiales distintos</div>
+            <button id="btnDLBaseMM" class="btn btn-outline" type="button" title="Descargar BASE_MM.csv" style="min-width: auto !important; width: auto !important;">
+              ⬇ BASE MM
+            </button>
+          </div>
+        </div>
+
+        <div class="kpi kpi-green">
+          <div class="kpi-head">
+            <div class="kpi-title">CANT DISPONIBLE</div>
+            <div class="kpi-icon">✅</div>
+          </div>
+          <div id="kpiDisp" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Materiales con Libre utilización &gt; 0</div>
+        </div>
+
+        <div class="kpi kpi-amber">
+          <div class="kpi-head">
+            <div class="kpi-title">DISPONIBLE</div>
+            <div class="kpi-icon">📈</div>
+          </div>
+          <div id="kpiPct" class="kpi-value">-</div>
+          <div class="kpi-sub kpi-sub-strong">Disponible / Materiales</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTADOS -->
+    <section class="panel">
+      <div class="panel-title">ESTADOS Y VALORIZACIÓN
+        <button class="help-btn" onclick="openHelp('Gráfico — Estados y Valorización', `
+          <h4>Grafico circular de Estados</h4>
+          <p>Representa la disponibilidad de materiales del almacén seleccionado</p>
+          <h4>Tabla: Valorización de Stock</h4>
+          <p>Esta tabla muestra la valorización de stock por RUBRO del almacén seleccionado expuesto de mayor a menor</p>
+          <h4>⬇ Sin Rubro</h4>
+          <p>El stock de materiales los clasificamos en STOCK NULO, STOCK MENOR AL PP, STOCK MAYOR AL PP, STOCK MAYOR AL STOCK MAXIMO. Se puede descargar cada una de estas clasificaciones haciendo clic en los botones correspondientes.</p>
+          <div class=&quot;hm-tip&quot;>💡 ALERTAS: Tené en cuenta que cuando veas RUBROS (vacios, ?, otros, obsoleto) aparecerá en rojo, y podés ver los códigos de materiales sin rubro presionando el botón SIN RUBRO. El responzable de abastecimiento del proyecto completará el rubro enviandolo a abastecimiento.sap .</div>
+        `)" title="Ayuda sobre estados y valorización">ℹ</button>
+      </div>
+      <div class="panel-body">
+        <div class="mm-card">
+          <div class="mm-two">
+            <!-- Bloque 1: Gráfico circular + leyenda -->
+            <div class="mm-block">
+              <div class="mm-block-title">ESTADOS</div>
+              <div class="mm-donut-wrap">
+                <div id="donutEstados" class="mm-donut" aria-label="Gráfico circular"></div>
+              </div>
+              <div class="mm-legend" id="donutLegend" aria-label="Leyenda del gráfico"></div>
+            </div>
+
+            <!-- Bloque 2: Tabla valorización -->
+            <div class="mm-block">
+              <div class="mm-block-title-row">
+                <div class="mm-block-title">VALORIZACIÓN DE STOCK</div>
+                <button id="btnDLStoNuloPP" class="btn btn-outline" type="button" title="Descargar filas sin rubro">
+                  ⬇ SIN RUBRO
+                </button>
+              </div>
+              <div class="mm-table-wrap mm-table-wrap-scroll">
+                <table id="tablaValorizacion" class="mm-table">
+                  <thead>
+                    <tr>
+                      <th>RUBRO</th>
+                      <th class="num">Valor libre utilización</th>
+                      <th class="num">% del total</th>
+                      <th class="num">% acumulado</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                  <tfoot>
+                    <tr>
+                      <td><b>Total general</b></td>
+                      <td id="valTotal" class="num"></td>
+                      <td class="num">100,00%</td>
+                      <td class="num">100,00%</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EVOLUCIÓN -->
+    <section class="panel">
+      <div class="panel-title">EVOLUCIÓN POR MES
+        <button class="help-btn" onclick="openHelp('Gráfico — Evolución por Mes', `
+          <p>Línea de tiempo que muestra cómo <strong>evolucionó la disponibilidad (%) mes a mes</strong>.</p>
+          <p>Podés filtrar por obra con el selector que aparece sobre el gráfico.</p>
+          <div class=&quot;hm-tip&quot;>💡 Si seleccionás &ldquo;Todas&rdquo;, verás la disponibilidad promedio de todos los almacenes.</div>
+        `)" title="Ayuda sobre la evolución por mes">ℹ</button>
+      </div>
+      <div class="panel-body">
+        <div class="mm-card">
+          <div style="margin-bottom:10px">
+            <select id="obraSelect">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div id="chartEvolucion" style="width:100%;height:420px;"></div>
+        </div>
+      </div>
+    </section>
+
+    </footer>
+  </main>
+
+  <script src="last-update.js"></script>
+  <script src="help.js"></script>
+  <script src="analisis-mm.js?v=12"></script>
+  <script src="evolucion.js?v=2"></script>
+</body>
+
+</html>
