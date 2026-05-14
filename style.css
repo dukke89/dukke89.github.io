@@ -1,0 +1,134 @@
+/* style.css – diseño premium, minimalista y responsivo */
+/* Fuente principal */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+header .highlight {
+  color: #d32f2f; /* rojo vivo */
+}
+header .subtitle {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.filter-controls {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.filter-controls label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.filter-controls select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filter-controls select:focus {
+  border-color: #4e79a7;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1rem;
+}
+
+.table-container {
+  width: 100%;
+  max-width: 1200px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+  font-size: 0.95rem;
+}
+
+thead th {
+  background: #4e79a7;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+tbody td {
+  background: rgba(255,255,255,0.9);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+tbody tr:hover td {
+  background: rgba(255,255,255,1);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+/* Fecha vencida en rojo */
+.overdue {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.loading-indicator {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: #777;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(8px);
+  font-size: 0.85rem;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  header h1 {font-size: 1.6rem;}
+  thead th, tbody td {padding: 0.6rem 0.8rem;}
+}
