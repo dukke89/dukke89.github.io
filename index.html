@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planilla de Estados de Pedidos</title>
+  <!-- Google Font for premium look -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header>
+    <h1>🗂️ Planilla de Pedidos – Estado <span class="highlight">CUMPLIDO</span></h1>
+    <p class="subtitle">Solo los pedidos adjudicados, con entregas vencidas resaltadas en rojo.</p>
+  </header>
+
+  <main>
+    <section class="table-container">
+      <table id="orders-table">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Estado</th>
+            <th>Entrega esperada</th>
+            <th>Cantidad</th>
+            <th>Descripción</th>
+            <th>Centro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Filas generadas dinámicamente -->
+        </tbody>
+      </table>
+    </section>
+    <p id="loading" class="loading-indicator">Cargando datos…</p>
+  </main>
+
+  <footer>
+    <small>© 2026 – Generado automáticamente</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
