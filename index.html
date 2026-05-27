@@ -1,0 +1,1365 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABASTECIMIENTO</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="base.css" />
+  <link rel="stylesheet" href="cumplimiento.css" />
+  <link rel="stylesheet" href="analisis-mm.css" />
+  <link rel="stylesheet" href="demoras.css" />
+  <link rel="stylesheet" href="ejemplo.css" />
+  
+  <!-- Chart.js and plugin loaded once globally -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  
+  <!-- Apache ECharts loaded once globally -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <style>
+    /* Estilos para el panel de Servicios (Scoped to #panel-servicios to prevent style bleeding) */
+    #panel-servicios .kpi-mini-box {
+      height: 70px !important;
+      background: #ffffff;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    #panel-servicios .kpi-mini-value { display: block; font-size: 2rem; font-weight: 800; color: #3b82f6; line-height: 1; }
+    #panel-servicios .kpi-mini-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-top: 5px; }
+
+    #panel-servicios .filters-6 { 
+      display: grid !important; 
+      grid-template-columns: 1.2fr 0.8fr 2.2fr 0.7fr 2.2fr 1fr !important; 
+      gap: 12px; 
+      padding: 15px !important; 
+      align-items: start;
+    }
+    #panel-servicios .filter-wide { width: 100%; }
+    #panel-servicios .filter-narrow { width: 100%; }
+
+    #panel-servicios .multi-select {
+      height: 110px !important;
+      font-size: 0.85rem !important;
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 4px;
+    }
+
+    #panel-servicios .filter label {
+      display: inline-block;
+      background-color: #0d9488;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    #panel-servicios #serv_btnDownloadSelection {
+      width: 100% !important;
+      height: 32px !important;
+      font-size: 0.75rem !important;
+      margin-top: 0 !important;
+    }
+    #panel-servicios #serv_btnDownloadSelection:hover {
+      background-color: #f8fafc;
+    }
+
+    #panel-servicios table { width: 100%; border-collapse: collapse; font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; min-width: 2200px; }
+    #panel-servicios th { 
+      background: #f8fafc; 
+      color: #1e293b; 
+      font-weight: 700; 
+      padding: 10px 8px; 
+      text-align: left; 
+      border-bottom: 3px solid #3b82f6 !important; 
+      vertical-align: bottom;
+      white-space: normal !important; 
+      line-height: 1.2;
+      min-width: 100px;
+    }
+    #panel-servicios td { 
+      padding: 10px 8px; 
+      border-bottom: 1px solid #cbd5e1 !important;
+      white-space: nowrap; 
+    }
+    #panel-servicios tbody tr:hover { background-color: #f1f5f9 !important; }
+
+    #panel-servicios th:nth-child(4), #panel-servicios td:nth-child(4),
+    #panel-servicios th:nth-child(5), #panel-servicios td:nth-child(5),
+    #panel-servicios th:nth-child(6), #panel-servicios td:nth-child(6),
+    #panel-servicios th:nth-child(7), #panel-servicios td:nth-child(7) {
+      min-width: 85px !important;
+      max-width: 100px !important;
+      text-align: center;
+      white-space: normal;
+    }
+
+    #panel-servicios .top-scroll-wrapper { width: 100%; overflow-x: auto; overflow-y: hidden; height: 18px; margin-top: 20px; background: #f1f5f9; border-radius: 8px 8px 0 0; }
+    #panel-servicios .fake-content { height: 1px; }
+    #panel-servicios .master-wrapper { width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; background: white; }
+
+    #panel-servicios .row-verde { background-color: #dcfce7 !important; color: #166534; }
+    #panel-servicios .row-rojo { background-color: #fee2e2 !important; color: #991b1b; }
+    #panel-servicios .cell-rojo { background-color: #fecaca !important; color: #991b1b; font-weight: 600; text-align: center; border-radius: 4px; }
+    #panel-servicios .cell-verde { background-color: #bbf7d0 !important; color: #166534; font-weight: 600; text-align: center; border-radius: 4px; }
+
+    /* Estilo para los botones de pestañas en SPA */
+    nav.tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0px;
+      margin-bottom: 1.5rem;
+    }
+    nav.tabs .tab {
+      background: none;
+      border: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    nav.tabs .tab:hover {
+      color: #0f172a;
+      border-bottom-color: #cbd5e1;
+    }
+    nav.tabs .tab.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+    .tab-panel {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body class="page-cumplimiento">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="title">ABASTECIMIENTO</div>
+      <div id="topbarSubtitle" class="subtitle">Análisis de Cumplimiento de Pedidos por Obra</div>
+    </div>
+
+    <div class="topbar-right" style="display: flex; gap: 0.5rem; align-items: stretch;">
+      <button class="btn-refresh-top" onclick="window.forceRefreshData()" title="Actualizar datos">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </button>
+      <div class="update-box">
+        <div class="update-label">Última actualización</div>
+        <div id="lastUpdate" class="update-date">--/--/----</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab" data-tab="mm" onclick="window.switchTab('mm')">ANÁLISIS MM</button>
+    <button class="tab active" data-tab="cumplimiento" onclick="window.switchTab('cumplimiento')">CUMPLIMIENTO</button>
+    <button class="tab" data-tab="demoras" onclick="window.switchTab('demoras')">DEMORAS</button>
+    <button class="tab" data-tab="servicios" onclick="window.switchTab('servicios')">SERVICIOS</button>
+    <button class="tab" data-tab="ejemplo" onclick="window.switchTab('ejemplo')">📊 EJEMPLO</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL: CUMPLIMIENTO (Active by default)
+    ═══════════════════════════════════════════════════════ -->
+    <section id="panel-cumplimiento" class="tab-panel">
+      <!-- LOADER CUMPLIMIENTO -->
+      <div id="cumpl_loader" class="loader-overlay">
+        <div class="spinner-bars">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="loading-text">Cargando datos...</div>
+      </div>
+
+      <div id="cumpl_msg"></div>
+
+      <!-- FILTROS -->
+      <section class="panel">
+        <div class="panel-title">FILTROS
+          <button class="help-btn" onclick="openHelp('Filtros — Cumplimiento', `
+            <h4>Cliente / Obra</h4>
+            <p>Filtrá los pedidos por el nombre de la obra o cliente. Podés seleccionar varios con <strong>Ctrl + clic</strong>.</p>
+            <h4>Clasificación</h4>
+            <p>La clasificacion agrupa los grupos de compra de acuerdo al tipo de pedido solicitado.</p>
+            <h4>GC OC</h4>
+            <p>Filtrá por Grupo de Compra</p>
+            <h4>Mes de Entrega</h4>
+            <p>Seleccioná uno o varios meses (formato <em>MMM-AAAA</em>) para acotar el período analizado.</p>
+            <h4>⬇ Descargar NO entregados</h4>
+            <p>Exporta en CSV el listado de pedidos no entregados según los filtros activos.</p>
+            <div class=&quot;hm-tip&quot;>💡 Si no seleccionás ningún filtro, se muestran todos los datos disponibles.</div>
+          `)" title="Ayuda sobre los filtros">ℹ</button>
+        </div>
+        <div class="panel-body filters filters-4">
+          <div class="filter">
+            <label>CLIENTE / OBRA</label>
+            <select id="cumpl_clienteSelect" multiple size="6" class="multi-select">
+              <option value="">Todos</option>
+            </select>
+            <div id="cumpl_clienteHint" class="hint">Columna: -</div>
+          </div>
+
+          <div class="filter">
+            <label>CLASIFICACIÓN</label>
+            <div id="cumpl_clasif2List" class="check-list">
+              <!-- populated by JS -->
+            </div>
+            <div id="cumpl_clasif2Hint" class="hint">Columna: -</div>
+          </div>
+
+          <div class="filter">
+            <label>GC OC</label>
+            <select id="cumpl_gcocSelect" multiple size="6" class="multi-select">
+              <option value="">Todos</option>
+            </select>
+            <div id="cumpl_gcocHint" class="hint">Columna: -</div>
+          </div>
+
+          <div class="filter">
+            <label>MES DE ENTREGA</label>
+            <select id="cumpl_mesSelect" multiple size="6" class="multi-select"></select>
+            <div id="cumpl_mesHint" class="hint">Mes seleccionado</div>
+          </div>
+
+          <div class="filter">
+            <label>&nbsp;</label>
+            <button id="cumpl_btnDownloadNO" class="btn">
+              ⬇ Descargar NO entregados
+            </button>
+            <div class="hint">Exporta CSV con “;”</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPIs ACUMULADO -->
+      <section class="panel">
+        <div class="panel-title">CUMPLIMIENTO ACUMULADO (últimos 12 meses)
+          <button class="help-btn" onclick="openHelp('KPIs — Cumplimiento Acumulado', `
+            <h4><span style=&quot;color:#3b82f6&quot;>📦 Comprometidos</span></h4>
+            <p>Total de pedidos comprometidos en los últimos 12 meses: suma de AT + FT + No entregados.</p>
+            <h4><span style=&quot;color:#10b981&quot;>✅ Entregados a Tiempo (AT)</span></h4>
+            <p>Pedidos que llegaron en la fecha acordada o antes. Se muestra porcentaje y cantidad.</p>
+            <h4><span style=&quot;color:#f59e0b&quot;>⏳ Entregados Fuera de Tiempo (FT)</span></h4>
+            <p>Pedidos entregados después de la fecha comprometida. Generaron demora.</p>
+            <h4><span style=&quot;color:#ef4444&quot;>🚫 No Entregados (NE)</span></h4>
+            <p>Pedidos que aún no fueron entregados. Representan el mayor riesgo operativo.</p>
+            <h4>📅 Demora Promedio</h4>
+            <p>Días promedio de atraso de los pedidos FT.</p>
+          `)" title="Ayuda sobre KPIs acumulados">ℹ</button>
+        </div>
+
+        <div class="panel-body kpi-grid kpi-grid-5">
+          <div class="kpi kpi-blue">
+            <div class="kpi-head">
+              <div class="kpi-title">COMPROMETIDOS</div>
+              <div class="kpi-icon">📦</div>
+            </div>
+            <div id="cumpl_kpiTotal" class="kpi-value">-</div>
+            <div class="kpi-sub">AT + FT + No entregados</div>
+          </div>
+
+          <div class="kpi kpi-green">
+            <div class="kpi-head">
+              <div class="kpi-title">ENTREGADOS A TIEMPO</div>
+              <div class="kpi-icon">✅</div>
+            </div>
+            <div id="cumpl_kpiATpct" class="kpi-value">-</div>
+            <div id="cumpl_kpiATqty" class="kpi-sub kpi-sub-strong">Cantidad: -</div>
+          </div>
+
+          <div class="kpi kpi-amber">
+            <div class="kpi-head">
+              <div class="kpi-title">ENTREGADOS FUERA DE TIEMPO</div>
+              <div class="kpi-icon">⏳</div>
+            </div>
+            <div id="cumpl_kpiFTpct" class="kpi-value">-</div>
+            <div id="cumpl_kpiFTqty" class="kpi-sub kpi-sub-strong">Cantidad: -</div>
+          </div>
+
+          <div class="kpi kpi-red">
+            <div class="kpi-head">
+              <div class="kpi-title">NO ENTREGADOS</div>
+              <div class="kpi-icon">🚫</div>
+            </div>
+            <div id="cumpl_kpiNOpct" class="kpi-value">-</div>
+            <div id="cumpl_kpiNOqty" class="kpi-sub kpi-sub-strong">Cantidad: -</div>
+          </div>
+
+          <div class="kpi kpi-slate">
+            <div class="kpi-head">
+              <div class="kpi-title">DEMORA PROMEDIO</div>
+              <div class="kpi-icon">📅</div>
+            </div>
+            <div id="cumpl_kpiDemoraAvg" class="kpi-value">-</div>
+            <div class="kpi-sub">Días promedio</div>
+          </div>
+        </div>
+      </</section>
+
+      <!-- KPIs MES -->
+      <section class="panel">
+        <div id="cumpl_panelMesTitle" class="panel-title">CUMPLIMIENTO - MES SELECCIONADO
+          <button class="help-btn" onclick="openHelp('KPIs — Mes Seleccionado', `
+            <p>Esta fila muestra los mismos indicadores que la sección acumulada (Comprometidos, % AT, % FT, % NE, Demora) pero <strong>filtrados solo por el mes activo</strong> en el filtro &ldquo;Mes de Entrega&rdquo;.</p>
+            <p>Si no hay ningún mes seleccionado, se muestra el mes más reciente con datos.</p>
+            <div class=&quot;hm-tip&quot;>💡 El encabezado del panel indica exactamente qué mes se está mostrando.</div>
+          `)" title="Ayuda sobre KPIs del mes">ℹ</button>
+        </div>
+
+        <div class="panel-body kpi-grid kpi-grid-5">
+          <div class="kpi kpi-blue">
+            <div class="kpi-head">
+              <div class="kpi-title">COMPROMETIDOS (MES)</div>
+              <div class="kpi-icon">📦</div>
+            </div>
+            <div id="cumpl_kpiTotalMes" class="kpi-value">-</div>
+            <div class="kpi-sub">Total del mes</div>
+          </div>
+
+          <div class="kpi kpi-green">
+            <div class="kpi-head">
+              <div class="kpi-title">% AT (MES)</div>
+              <div class="kpi-icon">✅</div>
+            </div>
+            <div id="cumpl_kpiATmes" class="kpi-value">-</div>
+            <div id="cumpl_kpiATmesSub" class="kpi-sub kpi-sub-strong">Cant: -</div>
+          </div>
+
+          <div class="kpi kpi-amber">
+            <div class="kpi-head">
+              <div class="kpi-title">% FT (MES)</div>
+              <div class="kpi-icon">⏳</div>
+            </div>
+            <div id="cumpl_kpiFTmes" class="kpi-value">-</div>
+            <div id="cumpl_kpiFTmesSub" class="kpi-sub kpi-sub-strong">Cant: -</div>
+          </div>
+
+          <div class="kpi kpi-red">
+            <div class="kpi-head">
+              <div class="kpi-title">% NE (MES)</div>
+              <div class="kpi-icon">🚫</div>
+            </div>
+            <div id="cumpl_kpiNOmes" class="kpi-value">-</div>
+            <div id="cumpl_kpiNOmesSub" class="kpi-sub kpi-sub-strong">Cant: -</div>
+          </div>
+
+          <div class="kpi kpi-slate">
+            <div class="kpi-head">
+              <div class="kpi-title">DEMORA (MES)</div>
+              <div class="kpi-icon">📅</div>
+            </div>
+            <div id="cumpl_kpiDemoraMes" class="kpi-value">-</div>
+            <div class="kpi-sub kpi-sub-strong">Promedio del mes</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GRAFICO -->
+      <section class="panel">
+        <div class="panel-title">CUMPLIMIENTO POR MES
+          <button class="help-btn" onclick="openHelp('Gráfico — Cumplimiento por Mes', `
+            <p>El gráfico de barras apiladas nos muestra el cumplimiento mes a mes. Cada barra suma 100% que equivale a la cantidad de items 
+            comprometidos a entregar y se divide en: Entregados a término (AT), Entregados fuera de término (FT) y No entregados (NE)</p>
+            <div class=&quot;hm-tip&quot;>💡 El cumplimiento AT establecido para el año 2026 es del 78%.</div>
+          `)" title="Ayuda sobre el gráfico por mes">ℹ</button>
+        </div>
+        <div class="panel-body">
+          <div class="chart-card">
+            <div class="chart-wrap">
+              <div id="cumpl_chartMes" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TENDENCIA -->
+      <section class="panel">
+        <div class="panel-title">TENDENCIA DE CUMPLIMIENTO
+          <button class="help-btn" onclick="openHelp('Gráfico — Tendencia de Cumplimiento', `
+            <p>Indica la tendencia/comportamiento de estos indicadores:<br>
+                                  🔹Entregados a término (AT)<br>
+                                  🔹Entregados fuera de término (FT)<br>
+                                  🔹No entregados (NE)<br>
+                                  🔹Promedio mensual acumulado(AT)<br>
+                              <p>
+            <div class=&quot;hm-tip&quot;>💡 La línea de tendencia ayuda a ver si el desempeño mejora o empeora a lo largo del tiempo.</div>
+          `)" title="Ayuda sobre la tendencia">ℹ</button>
+        </div>
+        <div class="panel-body">
+          <div class="chart-card">
+            <div class="chart-wrap">
+              <div id="cumpl_chartTendencia" class="chart-box"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL: ANÁLISIS MM
+    ═══════════════════════════════════════════════════════ -->
+    <section id="panel-mm" class="tab-panel" style="display: none;">
+      <div id="mm_msg"></div>
+
+      <!-- FILTRO -->
+      <section class="panel">
+        <div class="panel-title">FILTROS
+          <button class="help-btn" onclick="openHelp('Filtro — Análisis MM', `
+            <h4>Cliente (Almacén)</h4>
+            <p>Seleccioná uno o varios almacenes para filtrar. </p>
+            <h4>⬇ Descargar BASE MM</h4>
+            <p>Exporta el Maestro de materiales del almacén seleccionado, compatible con Excel (separador <strong>;</strong>).</p>
+            <div class=&quot;hm-tip&quot;>💡 Podés seleccionar múltiples almacenes con <strong>Ctrl + clic</strong>.</div>
+          `)" title="Ayuda sobre el filtro de almacén">ℹ</button>
+        </div>
+        <div class="panel-body mm-filter-row">
+          <div class="filter">
+            <label>CLIENTE (ALMACEN)</label>
+            <div class="mm-client-row">
+              <select id="mm_clienteSelect" class="multi-select" multiple size="6"></select>
+            </div>
+            <div id="mm_clienteHint" class="hint">Columna: -</div>
+            <div class="hint">Descarga segun el almacen seleccionado</div>
+            <div class="hint">Mantén presionado Ctrl y haz clic en los almacenes para seleccion multiple</div>
+          </div>
+        </div>
+        <div class="filter mm-source">
+          <div class="hint"><b>Fuente:</b> ANALISIS-MM.csv</div>
+        </div>
+      </section>
+
+      <!-- KPIs -->
+      <section class="panel">
+        <div class="panel-title">DISPONIBILIDAD
+          <button class="help-btn" onclick="openHelp('KPIs — Disponibilidad', `
+            <h4>📦 Cant. Materiales</h4>
+            <p>Es la cantidad de materiales distintos planificados en el MM de acuerdo a la selección filtrada.</p>
+            <h4>✅ Cant. Disponible</h4>
+            <p>Es la cantidad de materiales disponibles (con stock distinto de cero) de acuerdo a la última actualización.</p>
+            <h4>📈 % Disponible</h4>
+            <p>Representa la cantidad de materiales disponibles en porcentaje.</p>
+          `)" title="Ayuda sobre los KPIs de disponibilidad">ℹ</button>
+        </div>
+
+        <div class="panel-body kpi-grid kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-head">
+              <div class="kpi-title">CANT MATERIALES</div>
+              <div class="kpi-icon">📦</div>
+            </div>
+            <div id="mm_kpiMat" class="kpi-value">-</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 8px;">
+              <div class="kpi-sub kpi-sub-strong" style="margin: 0;">Materiales distintos</div>
+              <button id="mm_btnDLBaseMM" class="btn btn-outline" type="button" title="Descargar BASE_MM.csv" style="min-width: auto !important; width: auto !important;">
+                ⬇ BASE MM
+              </button>
+            </div>
+          </div>
+
+          <div class="kpi kpi-green">
+            <div class="kpi-head">
+              <div class="kpi-title">CANT DISPONIBLE</div>
+              <div class="kpi-icon">✅</div>
+            </div>
+            <div id="mm_kpiDisp" class="kpi-value">-</div>
+            <div class="kpi-sub kpi-sub-strong">Materiales con Libre utilización &gt; 0</div>
+          </div>
+
+          <div class="kpi kpi-amber">
+            <div class="kpi-head">
+              <div class="kpi-title">DISPONIBLE</div>
+              <div class="kpi-icon">📈</div>
+            </div>
+            <div id="mm_kpiPct" class="kpi-value">-</div>
+            <div class="kpi-sub kpi-sub-strong">Disponible / Materiales</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADOS -->
+      <section class="panel">
+        <div class="panel-title">ESTADOS Y VALORIZACIÓN
+          <button class="help-btn" onclick="openHelp('Gráfico — Estados y Valorización', `
+            <h4>Grafico circular de Estados</h4>
+            <p>Representa la disponibilidad de materiales del almacén seleccionado</p>
+            <h4>Tabla: Valorización de Stock</h4>
+            <p>Esta tabla muestra la valorización de stock por RUBRO del almacén seleccionado expuesto de mayor a menor</p>
+            <h4>⬇ Sin Rubro</h4>
+            <p>El stock de materiales los clasificamos en STOCK NULO, STOCK MENOR AL PP, STOCK MAYOR AL PP, STOCK MAYOR AL STOCK MAXIMO. Se puede descargar cada una de estas clasificaciones haciendo clic en los botones correspondientes.</p>
+            <div class=&quot;hm-tip&quot;>💡 ALERTAS: Tené en cuenta que cuando veas RUBROS (vacios, ?, otros, obsoleto) aparecerá en rojo, y podés ver los códigos de materiales sin rubro presionando el botón SIN RUBRO. El responzable de abastecimiento del proyecto completará el rubro enviandolo a abastecimiento.sap .</div>
+          `)" title="Ayuda sobre estados y valorización">ℹ</button>
+        </div>
+        <div class="panel-body">
+          <div class="mm-card">
+            <div class="mm-two">
+              <!-- Bloque 1: Gráfico circular + leyenda -->
+              <div class="mm-block">
+                <div class="mm-block-title">ESTADOS</div>
+                <div class="mm-donut-wrap">
+                  <div id="mm_donutEstados" class="mm-donut" aria-label="Gráfico circular"></div>
+                </div>
+                <div class="mm-legend" id="mm_donutLegend" aria-label="Leyenda del gráfico"></div>
+              </div>
+
+              <!-- Bloque 2: Tabla valorización -->
+              <div class="mm-block">
+                <div class="mm-block-title-row">
+                  <div class="mm-block-title">VALORIZACIÓN DE STOCK</div>
+                  <button id="mm_btnDLStoNuloPP" class="btn btn-outline" type="button" title="Descargar filas sin rubro">
+                    ⬇ SIN RUBRO
+                  </button>
+                </div>
+                <div class="mm-table-wrap mm-table-wrap-scroll">
+                  <table id="mm_tablaValorizacion" class="mm-table">
+                    <thead>
+                      <tr>
+                        <th>RUBRO</th>
+                        <th class="num">Valor libre utilización</th>
+                        <th class="num">% del total</th>
+                        <th class="num">% acumulado</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                      <tr>
+                        <td><b>Total general</b></td>
+                        <td id="mm_valTotal" class="num"></td>
+                        <td class="num">100,00%</td>
+                        <td class="num">100,00%</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EVOLUCIÓN -->
+      <section class="panel">
+        <div class="panel-title">EVOLUCIÓN POR MES
+          <button class="help-btn" onclick="openHelp('Gráfico — Evolución por Mes', `
+            <p>Línea de tiempo que muestra cómo <strong>evolucionó la disponibilidad (%) mes a mes</strong>.</p>
+            <p>Podés filtrar por obra con el selector que aparece sobre el gráfico.</p>
+            <div class=&quot;hm-tip&quot;>💡 Si seleccionás &ldquo;Todas&rdquo;, verás la disponibilidad promedio de todos los almacenes.</div>
+          `)" title="Ayuda sobre la evolución por mes">ℹ</button>
+        </div>
+        <div class="panel-body">
+          <div class="mm-card">
+            <div style="margin-bottom:10px">
+              <select id="mm_obraSelect">
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <div id="mm_chartEvolucion" style="width:100%;height:420px;"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL: DEMORAS
+    ═══════════════════════════════════════════════════════ -->
+    <section id="panel-demoras" class="tab-panel" style="display: none;">
+      <div id="dem_msg"></div>
+
+      <!-- FILTROS -->
+      <section class="panel">
+        <div class="panel-body filters filters-demoras">
+          <div class="filter">
+            <label>CLIENTE</label>
+            <select id="dem_clienteSelect" multiple size="6" class="multi-select">
+              <option value="">Todos</option>
+            </select>
+            <div id="dem_clienteHint" class="hint">Columna cliente: -</div>
+          </div>
+          <div class="filter">
+            <label>CLASIFICACIÓN</label>
+            <div id="dem_clasifList" class="check-list">
+              <!-- populated by JS -->
+            </div>
+            <div id="dem_clasifHint" class="hint">Columna: -</div>
+          </div>
+
+          <div class="filter">
+            <label>MES</label>
+            <div class="filter-flex">
+              <select id="dem_mesSelect" multiple size="6" class="multi-select"></select>
+              <div class="filter-actions">
+                <button id="dem_btnDownloadFiltrado" class="btn btn-sm" type="button">⬇ Descargar</button>
+              </div>
+            </div>
+            <div id="dem_mesHint" class="hint">Mes seleccionado: -</div>
+          </div>
+        </div>
+      </</section>
+
+      <!-- KPIs -->
+      <section class="panel">
+        <div class="panel-title">ITEMS CUMPLIDOS FT - DESGLOSE POR ÁREA</div>
+        <div class="panel-body kpi-grid kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-head">
+              <div class="kpi-title">DEMORAS (MES)</div>
+              <div class="kpi-icon">⏱</div>
+            </div>
+            <div id="dem_kpiDemorasMes" class="kpi-value">-</div>
+            <div class="kpi-sub">Cantidad de pedidos con demora</div>
+          </div>
+
+          <div class="kpi kpi-amber">
+            <div class="kpi-head">
+              <div class="kpi-title">ÁREA TOP (MES)</div>
+              <div class="kpi-icon">🏷</div>
+            </div>
+            <div id="dem_kpiTopArea" class="kpi-value kpi-value-sm">-</div>
+            <div id="dem_kpiTopAreaSub" class="kpi-sub kpi-sub-strong">-</div>
+          </div>
+
+          <div class="kpi kpi-green">
+            <div class="kpi-head">
+              <div class="kpi-title">% TOP ÁREA</div>
+              <div class="kpi-icon">%</div>
+            </div>
+            <div id="dem_kpiTopPct" class="kpi-value">-</div>
+            <div class="kpi-sub">Sobre demoras del mes</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHARTS -->
+      <section class="panel">
+        <div class="panel-title">CANTIDAD Y PORCENTAJE DE DEMORAS POR MES</div>
+        <div class="panel-body">
+          <div class="chart-card" style="width:100%;">
+            <div class="chart-wrap" style="height: 540px;">
+              <div id="dem_chartMes" class="chart-box" aria-label="Demoras por mes y área"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMORAS X AREA -->
+      <section class="panel">
+        <div class="panel-title">DEMORAS X AREA SEGUN MES SELECCIONADO</div>
+        <div class="panel-body">
+          <div class="chart-card" style="width:100%;">
+            <div class="chart-wrap">
+              <div id="dem_chartAreas" class="chart-box" aria-label="% de demoras por área"></div>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-top:14px;">
+            <table class="table" id="dem_tablaAreas">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMORAS SEGÚN MES -->
+      <section class="panel">
+        <div class="panel-title">DEMORAS PROYECTO</div>
+        <div class="panel-body">
+          <div class="chart-card" style="width:100%;">
+            <div class="chart-wrap">
+              <div id="dem_chartMotivos" class="chart-box" aria-label="% de demoras según mes"></div>
+            </div>
+          </div>
+
+          <div class="table-wrap table-wrap-tight" style="margin-top:14px;">
+            <table class="table" id="dem_tablaMotivos">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL: SERVICIOS
+    ═══════════════════════════════════════════════════════ -->
+    <section id="panel-servicios" class="tab-panel" style="display: none;">
+      <div id="serv_loader" class="loader-overlay">
+        <div class="spinner-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+        <div class="loading-text">Cargando servicios...</div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-title">FILTROS DE SERVICIOS</div>
+        <div class="panel-body filters-6"> 
+          <div class="filter"><label>CLIENTE</label><select id="serv_clienteSelect" multiple class="multi-select"></select></div>
+          
+          <div class="filter"><label>PERÍODO</label><select id="serv_clasif2Select" multiple class="multi-select"></select></div>
+          
+          <div class="filter"><label>ESTADO</label><select id="serv_gcocSelect" multiple class="multi-select"></select></div>  
+          
+          <div class="filter"><label>G. COMPRA</label><select id="serv_grupoCompraSelect" multiple class="multi-select"></select></div> 
+          
+          <div class="filter"><label>ESTADO ITEM</label><select id="serv_estadoItemSelect" multiple class="multi-select"></select></div>
+          
+          <div class="filter-kpi">
+            <label>TOTAL</label>
+            <div class="kpi-mini-box">
+              <span id="serv_kpiTotal" class="kpi-mini-value">0</span>
+              <span class="kpi-mini-label">Servicios</span>
+            </div>
+            <button id="serv_btnDownloadSelection" class="btn-small">⬇ Descargar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">ANÁLISIS GESTIÓN SERVICIOS</div>
+        <div class="top-scroll-wrapper" id="serv_top-scroll"><div class="fake-content" id="serv_fake-content"></div></div>
+        <div class="master-wrapper" id="serv_bottom-scroll">
+          <table id="serv_tablaServicios">
+            <thead>
+              <tr>
+                <th>NRO. VA01/VA21</th>
+                <th>CODIGO ITEM</th>
+                <th>DESCRIPCIÓN ITEM</th>
+                <th>SOLICITADO</th>
+                <th>RECEPCIONADO</th>
+                <th>PENDIENTE DE ADJUDICAR</th>
+                <th>PENDIENTE DE RECEPCIONAR</th>
+                <th>ESTADO ITEM</th>
+                <th>F.ENTREGA ESPERADA</th>
+                <th>NRO. RECEPCION</th>
+                <th>FECHA RECEPCION</th>
+                <th>NRO. OC</th>
+                <th>GRUPO DE COMPRA</th>
+                <th>Estado Servicio</th>
+                <th>Período de certificación</th>
+              </tr>
+            </thead>
+            <tbody id="serv_tablaBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">GRÁFICO RESUMEN</div>
+        <div class="panel-body" style="display: flex; justify-content: center; align-items: center; padding: 20px;">
+          <div style="width: 100%; max-width: 700px; height: 350px;"> 
+            <canvas id="serv_chartEstados"></canvas>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL: EJEMPLO (Static instructions)
+    ═══════════════════════════════════════════════════════ -->
+    <section id="panel-ejemplo" class="tab-panel" style="display: none;">
+      <div class="ej-hero">
+        <h1>📊 ¿Cómo utilizar el Dashboard de Abastecimiento?</h1>
+        <h3>Actualización del reporte: lunes y jueves desde las 13:00 hs</h3>
+      </div>
+
+      <!-- TABS NAVIGATION -->
+      <div class="ej-tabs-container">
+        <button class="ej-tab-btn active" onclick="showEjemploTab('tab-mm')">ANÁLISIS MM</button>
+        <button class="ej-tab-btn" onclick="showEjemploTab('tab-cumplimiento')">CUMPLIMIENTO</button>
+        <button class="ej-tab-btn" onclick="showEjemploTab('tab-demoras')">DEMORAS</button>
+      </div>
+
+      <!-- TAB: ANÁLISIS MM -->
+      <section id="tab-mm" class="ej-tab-content active">
+        <section class="ej-scenario">
+          <div class="ej-scenario-header">
+            <span style="font-size:1.4rem">📦</span>
+            <div>
+              <div class="ej-sh-title">ANÁLISIS MM</div>
+            </div>
+            <span class="ej-tab-badge" style="background:#e0f2fe;color:#0369a1;margin-left:auto">ANÁLISIS MM</span>
+          </div>
+          
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">1</div>
+              <div class="ej-step-title">Filtro de Almacén</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/FILTROS_MM.JPG" alt="Filtros">
+              </div>    
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>En el filtro <strong>CLIENTE (ALMACÉN)</strong> seleccioná de la lista el proyecto que desees analizar. Por ej.: Si querés ver el ANALISIS MM del almacén definitivo de la obra <strong>"00341 Mov. Suelos San Luis"</strong>, seleccioná <strong>"0035 y 0341"</strong> ya que esta obra tiene dos almacenes. Para seleccionar más de un almacén definitivo, mantené presionada la tecla <strong>Ctrl</strong>.</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Desde el botón <strong>DESCARGAR BASE MM</strong> se puede descargar el maestro de materiales completo. Para luego filtrar la obra que se desea analizar</span>
+                </div>
+              </div>
+            </div>
+          </div>    
+
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">2</div>
+              <div class="ej-step-title">TARJETAS DE DISPONIBILIDAD</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/TARJERAS MM.JPG" alt="Filtros">
+              </div>    
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span><strong>CANT MATERIALES</strong>: Es la cantidad de materiales distintos planificados en el MM de acuerdo a la selección filtrada .</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span><strong>CANT DISPONIBLE</strong>: Es la cantidad de materiales disponibles (con stock distinto de cero) de acuerdo a la última actualización.</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span><strong>DISPONIBLE</strong>: Representa la cantidad de materiales disponibles en porcentaje.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">3</div>
+              <div class="ej-step-title">ESTADOS</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/ESTADO_MM.JPG" alt="Filtros">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Este gráfico circular representa la disponibilidad de materiales del almacén seleccionado</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>El stock de materiales los clasificamos en STOCK NULO, STOCK MENOR AL PP, STOCK MAYOR AL PP, STOCK MAYOR AL STOCK MAXIMO. Se puede descargar cada una de estas clasificaciones haciendo clic en los botones correspondientes.</span>
+                </div>
+              </div>
+            </div>                    
+          </div>
+
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">4</div>
+              <div class="ej-step-title">VALORIZACION DE STOCK</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/VALORIZACION.JPG" alt="Filtros">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Esta tabla muestra la valorización de stock por <strong>RUBRO</strong> del almacén seleccionado expuesto de mayor a menor</span>
+                </div>
+              </div>
+              <div class="ej-reading-item ej-ri-info">
+                <span class="ej-ri-icon">⚠️</span>
+                <span><strong>ALERTAS</strong>: Tené en cuenta que cuando veas RUBROS (vacios, ?, otros, obsoleto) aparecerá en rojo, y podés ver los códigos de materiales sin rubro presionando el botón <strong>SIN RUBRO</strong>. El responzable de abastecimiento del proyecto completará el rubro enviandolo a <strong>abastecimiento.sap</strong> .</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">5</div>
+              <div class="ej-step-title">EVOLUCION DEL MAESTRO DE MATERIALES</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/EVOLUCION.JPG" alt="Filtros">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Primero seleccioná la obra que desees analizar en el filtro</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Podrás ver la evolución del maestro de materiales a lo largo del año. Tanto la disponibilidad como las cantidades están promediadas mensualmente.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>  
+      </section>
+
+      <!-- TAB: CUMPLIMIENTO -->
+      <section id="tab-cumplimiento" class="ej-tab-content">
+        <section class="ej-scenario">
+          <div class="ej-hero" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <p>⚠️ <strong>Importante: Tener en cuenta</strong></p><br>
+            <p>🔹¿Que mide? El cumplimiento de los pedidos que surgen de una las VA tipo ZPAI, ZPAN, ZPAS y ZPOE cuyo cliente es una obra de cualquier sociedad (no tiene en cuenta solped y oc directas)</p><br>
+            <p>🔹¿Como mide? Es Cumplido a Término (AT) si la fecha de sello de almacenamiento en obra ≤ fecha de entrega esperada en VA (este indicador mide la totalidad del ítem indicado en la VA, no parciales).  </p><br>
+            <p>🔹 Características: La demora promedio se calcula solo sobre entregas demoradas.<br>
+            <p>🔹 Limitaciones: No se incluyen servicios (GC 24, 25, 26, 33, 16, 04) ni items tipo “Servicios”.</p>
+          </div>
+          
+          <div class="ej-scenario-header">
+            <span style="font-size:1.4rem">✅</span>
+            <div>
+              <div class="ej-sh-title">CUMPLIMIENTO</div>
+            </div>
+            <span class="ej-tab-badge badge-cumpl" style="margin-left:auto">CUMPLIMIENTO</span>
+          </div>
+
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">1</div>
+              <div class="ej-step-title">Selección de filtros</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/FILTROS.JPG" alt="Filtros">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>En el primer filtro <strong>CLIENTE/OBRA</strong> elegí de la lista la obra que desees analizar. Por ej.: <strong>"00341 Mov. Suelos San Luis"</strong>. Si querés ver solo el mes de febrero, seleccioná <strong>"2026-02"</strong> en el filtro de <strong>MES DE ENTREGA</strong> con un click.</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>La clasificacion agrupa los grupos de compra de acuerdo al tipo de pedido solicitado.</span>
+                </div>
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>ALMACEN: indica todos los materiales desde el almacen central al proyecto.<br>
+                        LOCAL CS: agrupa GC01,GC02,GC07.<br>
+                        AGV: GCAGV<br>
+                        COMPRAS ABASTECIMIENTO: GC SEDE + COMPRADORES EXCLUSIVOS.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-2">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">2</div>
+              <div class="ej-step-title">Leemos las tarjetas de cumplimiento acumulado</div>
+            </div>
+            <div class="ej-step-body">
+              <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 0.75rem;">
+                En estas tarjetas se muestra el cumplimiento acumulado de la obra seleccionada de los <strong>últimos 12 meses</strong>, independientemente del mes que hayamos filtrado.
+              </p>
+              <div class="ej-kpi-static-img">
+                <img src="img/ACUMULADO.JPG" alt="Cumplimiento acumulado (últimos 12 meses)">
+              </div>
+              <div class="ej-kpi-explains">
+                <div class="ej-kpi-explain-item">
+                  <div class="ej-reading-item ej-ri-info">
+                    <span class="ej-ri-icon">📦</span>
+                    <span class="ej-kpi-explain-badge" style="background:#dbeafe;color:#1d4ed8">COMPROMETIDOS</span>
+                    <span>En la obra <strong>"00341 Mov. Suelos San Luis"</strong> nos comprometimos a entregar/gestionar <strong>3072</strong> ítems en los últimos 12 meses.</span>
+                  </div>
+                </div>
+                <div class="ej-kpi-explain-item">
+                  <div class="ej-reading-item ej-ri-info">
+                    <span class="ej-ri-icon">✅</span>
+                    <span class="ej-kpi-explain-badge" style="background:#dcfce7;color:#166534">ENTREGADOS A TIEMPO (AT)</span>
+                    <span>El <strong>82,3 %</strong> de esos ítems fueron entregados AT, que equivalen a 2529 items. Figura en <strong>verde</strong> porque alcanzo el objetivo del <strong>78%</strong> establecido para el año 2026. De lo contrario figuraria en rojo.</span>
+                  </div> 
+                </div>
+                <div class="ej-kpi-explain-item">
+                  <div class="ej-reading-item ej-ri-info">
+                    <span class="ej-ri-icon">⏳</span>
+                    <span class="ej-kpi-explain-badge" style="background:#fef3c7;color:#92400e">FUERA DE TIEMPO (FT)</span>
+                    <span>El <strong>16,8%</strong> de esos ítems fueron entregados FT, que equivalen a 517 items. Para comprender las causas, es necesario analizar el detalle en la pestaña Demoras.</span>
+                  </div> 
+                </div>
+                <div class="ej-kpi-explain-item">
+                  <div class="ej-reading-item ej-ri-info">
+                    <span class="ej-ri-icon">🚫</span>
+                    <span class="ej-kpi-explain-badge" style="background:#fee2e2;color:#991b1b">NO ENTREGADOS (NE)</span>
+                    <span>Indica en porcentaje y cantidad los items que aun no han sido entregados en Obra. Estos los podes descargar desde el boton <strong>Descargar NO entregados</strong> en la sección de FILTROS.</span>
+                  </div> 
+                </div>
+                <div class="ej-kpi-explain-item">
+                  <div class="ej-reading-item ej-ri-info">
+                    <span class="ej-ri-icon">📅</span>
+                    <span class="ej-kpi-explain-badge" style="background:#f1f5f9;color:#475569">DEMORA PROMEDIO</span>
+                    <span>Indica que la <strong>demora promedio fue de 8 días</strong> de los pedidos que fueron entregados FT, durante los últimos 12 meses. Figura en <strong>rojo</strong> porque no alcanzo el objetivo de <strong>7 días</strong> establecido para el año 2026.</span>
+                  </div>
+                </div>
+              </div>    
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-3">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">3</div>
+              <div class="ej-step-title">Leemos las tarjetas del mes seleccionado</div>
+            </div>
+            <div class="ej-step-body">
+              <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 0.75rem;">
+                La segunda fila de tarjetas muestra <strong>solo el mes que filtramos</strong> (Feb-2026). Y hacemos el mismo analisis, podemos notar que el <strong>% ENTREGADO AT</strong> esta en <strong>rojo</strong> porque no alcanzo el 78% establecido y los dias de demora figura en <strong>verde</strong> porque esta por debajo de los 7 dias.
+              </p>
+              <div class="ej-kpi-static-img">
+                <img src="img/MENSUAL.JPG" alt="Cumplimiento MENSUAL">
+              </div>
+            </div>    
+          </div>
+
+          <div class="ej-step-card step-col-4">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">4</div>
+              <div class="ej-step-title">Analizamos el gráfico de cumplimiento por mes en los ultimos 12 meses</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/GRAFICO.JPG" alt="Grafico cumplimiento">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-good">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>El gráfico de barras apiladas nos muestra el cumplimiento mes a mes. Cada barra suma 100% que equivale a la cantidad de items comprometidos a entregar y se divide en <span style="color:#10b981;font-weight:700">Entregados a término (AT)</span>, <span style="color:#f59e0b;font-weight:700">Entregados fuera de término (FT)</span> y <span style="color:#ef4444;font-weight:700">No entregados (NE)</span></span>
+                </div>
+                <div class="ej-reading-item ej-ri-good">
+                  <span class="ej-ri-icon">📊</span>
+                  <span>Podemos ver por ejemplo que en agosto 2025 a septiembre 2025 hubo una disminución de ítems Entregados a término (AT) de un 84% a 76% y el 76 % figura con alerta en rojo porque no supera el 78% objetivo establecido para el 2026.</span>
+                </div>
+                <div class="ej-reading-item ej-ri-good">
+                  <span class="ej-ri-icon">📊</span>
+                  <span>También podemos ver el % de ítems entregados fuera de término (FT) subio de 16% a 24% de agosto a septiembre 2025. Y el Promedio de días de demora (linea de color celeste) vemos cómo aumenta de 9 días a 11 días de agosto a septiembre 2025.</span> 
+                </div>
+                <div class="ej-reading-item ej-ri-good">
+                  <span class="ej-ri-icon">🔍</span>
+                  <span>Si analizamos el mes de febrero 2026 tenemos un 13% (16 items) No entregados (NE) (poniendo el cursor del mouse sobre la columna del mes, aparecerá una pequeña ventana con todos los datos)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-4">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">5</div>
+              <div class="ej-step-title">Analizamos el gráfico de tendencia de cumplimiento por mes</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/TENDENCIA.JPG" alt="Grafico tendencia">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-good">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Indica la tendencia/comportamiento de estos indicadores:<br>
+                    🔹<span style="color:#10b981;font-weight:700">Entregados a término (AT)</span><br>
+                    🔹<span style="color:#f59e0b;font-weight:700">Entregados fuera de término (FT)</span><br>
+                    🔹<span style="color:#ef4444;font-weight:700">No entregados (NE)</span><br>
+                    🔹<span style="color:#10b981;font-weight:700">Promedio mensual acumulado(AT)</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- TAB: DEMORAS -->
+      <section id="tab-demoras" class="ej-tab-content">
+        <section class="ej-scenario">
+          <div class="ej-scenario-header">
+            <span style="font-size:1.4rem">⏱</span>
+            <div>
+              <div class="ej-sh-title">DEMORAS</div>
+            </div>
+            <span class="ej-tab-badge badge-dem" style="margin-left:auto">DEMORAS</span>
+          </div>
+
+          <div class="ej-step-card step-col-1">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">1</div>
+              <div class="ej-step-title">Selección de filtros</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img">
+                <img src="img/FILTRO DEMORA.JPG" alt="Filtros">
+              </div>
+              <div class="ej-reading">
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>En el filtro <strong>CLIENTE</strong> y la CLASIFICACIÓN elegí de la lista la obra que desees. Por ej.: <strong>"00341 Mov. Suelos San Luis"</strong>. Si querés ver solo el mes de febrero, seleccioná <strong>"FEBRERO 2026"</strong> en el filtro de <strong>MES</strong> con un click.</span>
+                </div>
+                <div class="ej-reading-item ej-ri-info">
+                  <span class="ej-ri-icon">📌</span>
+                  <span>Podes descargar las demoras (Items entregados FT) haciendo click en el botón <strong>Descargar</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-2">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">2</div>
+              <div class="ej-step-title">Leemos las tarjetas según el mes seleccionado</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img" style="margin-top:1rem">
+                <img src="img/TARJETAS DEMORAS.JPG" alt="Tarjetas demoras">
+              </div>
+              <div class="ej-reading-item ej-ri-good">
+                <span class="ej-ri-icon">📌</span>
+                <span>
+                  Estas tarjetas indican la cantidad total ítems que se entregaron FT durante el mes seleccionado.<br>
+                  🔴En este caso hubo <strong>35 ítems con demoras</strong> en el mes seleccionado<br>
+                  🔴El área con mayor cantidad de demoras en el mes fue <strong>COMPRAS</strong><br>
+                  🔴Con un porcentaje del 37,5%. 
+                </span>
+              </div> 
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-2">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">3</div>
+              <div class="ej-step-title">CANTIDAD DE DEMORAS POR MES Y POR ÁREA</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img" style="margin-top:1rem">
+                <img src="img/GRAFICO BARRAS DEMORAS.JPG" alt="Gráfico demoras">
+              </div>
+              <div class="ej-reading-item ej-ri-good">
+                <span class="ej-ri-icon">📌</span>
+                <span>
+                  📊 Este gráfico muestra la cantidad total de demoras por mes, desglosadas por área, junto con el porcentaje que representa cada una dentro del total mensual.<br>
+                  🔴El área con mayor cantidad de demoras se identifica con el color <strong>rojo</strong><br>
+                  🔵Tener en cuenta que un items con demora puede estar demorado en varias ÁREAS al mismo tiempo. <strong>EJEMPLO:</strong>
+                </span>
+              </div>
+              <div class="ej-kpi-static-img" style="margin-top: 1rem;">
+                <img src="img/EJEMPLO DEMORAS.JPG" alt="Ejemplo demoras desglose">
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-2">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">4</div>
+              <div class="ej-step-title">CANTIDAD DE DEMORAS POR MES SELECCIONADO Y POR ÁREA</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img" style="margin-top:1rem">
+                <img src="img/Grafico mensual DEMORAS AREA.JPG" alt="Gráfico circular demoras por área">
+              </div>
+              <div class="ej-reading-item ej-ri-good">
+                <span class="ej-ri-icon">📌</span>
+                <span>
+                  <strong>1️⃣ Gráfico circular</strong><br>
+                  Este gráfico muestra la distribución porcentual de las demoras por área en el mes que se encuentra seleccionado en el filtro.<br>
+                  El área con mayor cantidad de demoras se muestra en <strong>rojo</strong>
+                </span>
+              </div>
+              <div class="ej-reading-item ej-ri-good">
+                <span class="ej-ri-icon">📌</span>
+                <span>
+                  <strong>2️⃣ Tabla con mapa de calor</strong><br>
+                  “Muestra la cantidad de demoras por mes y por área (<strong>tener en cuenta que una demora puede repetirse en varias áreas</strong>)”<br>
+                  🔥 ¿Qué significa el color?<br>
+                  🔴 Rojo → Mayor cantidad de demoras<br>
+                  🟠 Naranja → Nivel medio<br>
+                  🟡 Amarillo → Nivel bajo<br>
+                  ⚪ Blanco → Muy bajo
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ej-step-card step-col-2">
+            <div class="ej-step-header">
+              <div class="ej-num-badge">5</div>
+              <div class="ej-step-title">DEMORAS PROYECTO</div>
+            </div>
+            <div class="ej-step-body">
+              <div class="ej-kpi-static-img" style="margin-top:1rem">
+                <img src="img/DEMORAS PROYECTO.JPG" alt="Demoras proyecto">
+              </div>
+              <div class="ej-reading-item ej-ri-good">
+                <span class="ej-ri-icon">📌</span>
+                <span>
+                  <strong>1️⃣ Gráfico circular</strong><br>
+                  Este gráfico muestra el motivo de las demoras correspondientes al área Proyecto, desagregadas por tipo de causa.<br>
+                  La causa con mayor cantidad de demoras se muestra en <strong>rojo</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <div class="footnote" style="display:block !important; margin-top:2rem;">
+        Ejemplo de Dashboard de Abastecimiento — Valores ilustrativos.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SCRIPTS Y CONTROLADOR DE PESTAÑAS SPA -->
+  <script src="last-update.js?v=20260519"></script>
+  <script src="help.js?v=20260519"></script>
+  <script src="cache-utils.js?v=20260519"></script>
+  
+  <script src="cumplimiento.js?v=20260519"></script>
+  <script src="analisis-mm.js?v=20260519"></script>
+  <script src="evolucion.js?v=20260519"></script>
+  <script src="demoras.js?v=20260519"></script>
+  <script src="servicios.js?v=20260519"></script>
+
+  <script>
+    // ═══════════════════════════════════════════════════════
+    // SPA ROUTER & LAZY-LOADING CONTROLLER
+    // ═══════════════════════════════════════════════════════
+    
+    // Subtítulos para cada pestaña
+    const TAB_SUBTITLES = {
+      'cumplimiento': 'Análisis de Cumplimiento de Pedidos por Obra',
+      'mm': 'Análisis de Disponibilidad de Materiales (MM)',
+      'demoras': 'Análisis de Demoras y Desglose por Área',
+      'servicios': 'Análisis de Servicios y Subcontratos de Obra',
+      'ejemplo': 'Ejemplo de uso del dashboard'
+    };
+
+    window.switchTab = function(tabName) {
+      // 1. Quitar clase active de todas las pestañas de navegación
+      document.querySelectorAll('.tabs .tab').forEach(el => el.classList.remove('active'));
+      
+      // 2. Ocultar todos los paneles principales
+      document.querySelectorAll('.tab-panel').forEach(el => el.style.display = 'none');
+      
+      // 3. Activar el botón de la pestaña seleccionada
+      const activeBtn = document.querySelector(`.tabs .tab[data-tab="${tabName}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      // 4. Mostrar el panel correspondiente
+      const panel = document.getElementById(`panel-${tabName}`);
+      if (panel) panel.style.display = 'block';
+
+      // 5. Cambiar el subtítulo del Topbar dinámicamente
+      const subtitleEl = document.getElementById('topbarSubtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = TAB_SUBTITLES[tabName] || 'Abastecimiento';
+      }
+      
+      // 6. Cambiar la clase del body para dar coherencia a las reglas específicas de páginas antiguas
+      const body = document.body;
+      body.className = ''; // limpiar
+      if (tabName === 'cumplimiento') body.className = 'page-cumplimiento';
+      else if (tabName === 'mm') body.className = 'page-mm';
+      else if (tabName === 'demoras') body.className = 'page-demoras';
+      else if (tabName === 'servicios') body.className = 'page-cumplimiento'; // comparte estilos con cumplimiento
+      
+      // 7. Inicializar de forma diferida (Lazy Load / On-Demand)
+      if (tabName === 'cumplimiento') {
+        if (typeof window.initCumplimiento === 'function') {
+          window.initCumplimiento();
+        }
+      } else if (tabName === 'mm') {
+        if (typeof window.initMM === 'function') {
+          window.initMM();
+        }
+      } else if (tabName === 'demoras') {
+        if (typeof window.initDemoras === 'function') {
+          window.initDemoras();
+        }
+      } else if (tabName === 'servicios') {
+        if (typeof window.initServicios === 'function') {
+          window.initServicios();
+        }
+      }
+      
+      // 8. Forzar evento de resize para que ECharts y Chart.js recalculen dimensiones de contenedores ocultos
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        // Scroll a la parte superior
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
+    };
+
+    // Control de pestañas internas del panel instructivo de EJEMPLO
+    function showEjemploTab(tabId) {
+      document.querySelectorAll('#panel-ejemplo .ej-tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('#panel-ejemplo .ej-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      const targetTab = document.getElementById(tabId);
+      if (targetTab) {
+        targetTab.classList.add('active');
+      }
+
+      document.querySelectorAll('#panel-ejemplo .ej-tab-btn').forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // Inicializar la primera pestaña por defecto al cargar el DOM
+    window.addEventListener('DOMContentLoaded', () => {
+      // Por defecto arranca en cumplimiento
+      window.switchTab('cumplimiento');
+    });
+  </script>
+</body>
+
+</html>
